@@ -1,4 +1,4 @@
-from typing import Any, List, Optional, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import pytest
 
@@ -19,8 +19,18 @@ from typing_extend import extended_isinstance
         (3, Optional[int], True),
         (None, Optional[int], True),
         ("3", Optional[int], False),
+        # Support `Tuple`
+        ((3,), tuple, True),
+        ((3,), Tuple, True),
+        ((3,), Tuple[Any], True),
+        ((3,), Tuple[int], True),
+        ((3,), Tuple[int, ...], True),
+        ((3,), Tuple[int, int], False),
+        ((3,), Tuple[str], False),
+        ((3,), Tuple[int, str], False),
         # Support `List`
         ([3], list, True),
+        ([3], List, True),
         ([3], List[Any], True),
         ([3], List[int], True),
         (["3"], List[int], False),
