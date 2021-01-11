@@ -29,6 +29,7 @@ mypy = "^0.790"
 pytest = "^6.2.1"
 pytest-cov = "^2.10.1"
 tox = "^3.21.0"
+black = "^20.8b1"
 
 [tool.pytest.ini_options]
 addopts = "--cov typing_extend --cov-report=term-missing --cov-report=xml"
