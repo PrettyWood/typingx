@@ -36,6 +36,14 @@ tox = "^3.21.0"
 line-length = 100
 target-version = ["py38"]
 
+[tool.isort]
+line_length = 100
+include_trailing_comma = true
+multi_line_output = 3
+indent = 4
+force_grid_wrap = 0
+use_parentheses = true
+
 [tool.pytest.ini_options]
 addopts = "--cov typing_extend --cov-report=term-missing --cov-report=xml"
 testpaths = ["tests"]
