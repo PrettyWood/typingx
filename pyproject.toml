@@ -26,6 +26,7 @@ python = "^3.6"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.1"
+tox = "^3.21.0"
 
 [build-system]
 requires = ["poetry>=0.12"]
