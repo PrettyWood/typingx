@@ -11,6 +11,9 @@ from typing_extend import extended_isinstance
         # Basic `isinstance` checks
         (3, int, True),
         ("3", int, False),
+        # Support `Any`
+        ("3", Any, True),
+        ([1, "3"], Any, True),
         # Support `Union`
         (3, Union[int, str], True),
         ([[3, 4], ["q", "w"]], List[Union[List[int], List[str]]], True),
