@@ -19,9 +19,6 @@ def extended_isinstance(obj: Any, tp: Any) -> bool:
     if origin is Union:
         return extended_isinstance(obj, get_args(tp))
 
-    if origin in (dict, list, tuple) and not isinstance(obj, origin):
-        return False
-
     # e.g. Dict[str, int]
     if origin is dict:
         if tp is Dict:
