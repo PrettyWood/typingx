@@ -5,6 +5,7 @@ isort = isort typing_extend tests
 install:
 	pip install poetry
 	poetry install
+	poetry run pre-commit install
 
 .PHONY: test
 test:
