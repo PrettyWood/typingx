@@ -25,6 +25,7 @@ classifiers = [
 python = "^3.6"
 
 [tool.poetry.dev-dependencies]
+mypy = "^0.790"
 pytest = "^6.2.1"
 pytest-cov = "^2.10.1"
 tox = "^3.21.0"
