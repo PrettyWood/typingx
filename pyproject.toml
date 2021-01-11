@@ -30,7 +30,7 @@ pytest-cov = "^2.10.1"
 tox = "^3.21.0"
 
 [tool.pytest.ini_options]
-addopts = "--cov typing_extend"
+addopts = "--cov typing_extend --cov-report=term-missing --cov-report=xml"
 testpaths = ["tests"]
 
 [build-system]
