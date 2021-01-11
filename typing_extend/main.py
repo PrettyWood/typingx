@@ -1,4 +1,4 @@
-from typing import Any, List, Union
+from typing import Any, Dict, List, Union
 
 from .typing_compat import get_args, get_origin
 
@@ -19,11 +19,20 @@ def extended_isinstance(obj: Any, tp: Any) -> bool:
     if origin is Union:
         return extended_isinstance(obj, get_args(tp))
 
-    if origin in (list, tuple) and not isinstance(obj, origin):
+    if origin in (dict, list, tuple) and not isinstance(obj, origin):
         return False
 
+    # e.g. Dict[str, int]
+    if origin is dict:
+        if tp is Dict:
+            tp = Dict[Any, Any]
+        keys_type, values_type = get_args(tp)
+        return all(extended_isinstance(key, keys_type) for key in obj.keys()) and all(
+            extended_isinstance(value, values_type) for value in obj.values()
+        )
+
     # e.g. List[str]
-    if origin is list:
+    elif origin is list:
         if tp is List:
             tp = List[Any]
         return all(extended_isinstance(x, get_args(tp)) for x in obj)

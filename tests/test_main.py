@@ -35,6 +35,12 @@ from typing_extend import extended_isinstance
         ([3], List[int], True),
         (["3"], List[int], False),
         ([3, "3"], List[Union[int, str]], True),
+        # Support `Dict`
+        ({"a": 1}, dict, True),
+        ({"a": 1}, Dict, True),
+        ({"a": 1}, Dict[Any, Any], True),
+        ({"a": 1}, Dict[str, Any], True),
+        ({"a": 1}, Dict[int, Any], False),
     ],
 )
 def test_extended_isinstance(obj, tp, expected):
