@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 import pytest
 
@@ -35,6 +35,13 @@ from typing_extend import extended_isinstance
         ([3], List[int], True),
         (["3"], List[int], False),
         ([3, "3"], List[Union[int, str]], True),
+        # Support `Set`
+        ({"a"}, set, True),
+        ({"a"}, Set, True),
+        ({"a"}, Set[Any], True),
+        ({"a"}, Set[str], True),
+        ({"a", 1}, Set[str], False),
+        ({"a", 1}, Set[Union[str, int]], True),
         # Support `Dict`
         ({"a": 1}, dict, True),
         ({"a": 1}, Dict, True),

@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Set, Union
 
 from .typing_compat import get_args, get_origin
 
@@ -28,10 +28,14 @@ def extended_isinstance(obj: Any, tp: Any) -> bool:
             extended_isinstance(value, values_type) for value in obj.values()
         )
 
-    # e.g. List[str]
-    elif origin is list:
+    # e.g. List[str] or Set[str]
+    elif origin in {list, set}:
+        # With recent python versions, `get_args` returns `(~T,)`, which we want to handle easily
         if tp is List:
             tp = List[Any]
+        elif tp is Set:
+            tp = Set[Any]
+
         return all(extended_isinstance(x, get_args(tp)) for x in obj)
 
     # e.g. Tuple[int, ...]
