@@ -22,6 +22,7 @@ format:
 
 .PHONY: lint
 lint:
+	poetry run flake8 typing_extend tests
 	poetry run ${black} --diff --check
 	poetry run ${isort} --check-only
 	poetry run mypy typing_extend
