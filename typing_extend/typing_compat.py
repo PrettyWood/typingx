@@ -1,14 +1,32 @@
+"""
+Module that handles differences between supported versions of Python
+for some methods / classes of the `typing` module
+"""
 import sys
+from typing import Any, Tuple, Type, cast
 
 __all__ = ("get_args", "get_origin", "is_typeddict", "TypedDict")
 
+pyver = sys.version_info[:2]
+
+
+def get_args(tp: Type[Any]) -> Tuple[Any, ...]:
+    """For python 3.6 and 3.7, we create a fallback"""
+    try:
+        from typing import get_args
+
+        return get_args(tp)
+    except ImportError:
+        return cast(Tuple[Any, ...], getattr(tp, "__args__", ()))
+
+
 # Python 3.10+
 if sys.version_info >= (3, 10):
-    from typing import TypedDict, get_args, get_origin, is_typeddict
+    from typing import TypedDict, get_origin, is_typeddict
 
 # Python 3.9+
 elif sys.version_info >= (3, 9):
-    from typing import Any, Type, get_args, get_origin
+    from typing import Any, Type, get_origin
 
     from typing_extensions import TypedDict
 
@@ -20,7 +38,7 @@ elif sys.version_info >= (3, 9):
 
 # Python 3.8+
 elif sys.version_info >= (3, 8):
-    from typing import Any, Type, get_args, get_origin
+    from typing import Any, Type, get_origin
 
     from typing_extensions import TypedDict
 
@@ -37,9 +55,6 @@ elif sys.version_info >= (3, 7):
     from typing_extensions import TypedDict
 
     from .utils import lenient_issubclass
-
-    def get_args(tp: Type[Any]) -> Tuple[Any, ...]:
-        return getattr(tp, "__args__", ())
 
     def get_origin(tp: Type[Any]) -> Optional[Type[Any]]:
         return getattr(tp, "__origin__", None)
@@ -63,9 +78,6 @@ else:
         Tuple: tuple,
         Type: type,
     }
-
-    def get_args(tp: Type[Any]) -> Tuple[Any, ...]:
-        return getattr(tp, "__args__", ())
 
     def get_origin(tp: Type[Any]) -> Optional[Type[Any]]:
         origin = getattr(tp, "__origin__", None)

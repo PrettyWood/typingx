@@ -1,3 +1,4 @@
+.DEFAULT_GOAL := all
 black = black typing_extend tests
 isort = isort typing_extend tests
 
@@ -26,3 +27,6 @@ lint:
 	poetry run ${black} --diff --check
 	poetry run ${isort} --check-only
 	poetry run mypy typing_extend
+
+.PHONY: all
+all: lint test
