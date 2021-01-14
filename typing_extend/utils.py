@@ -1,16 +1,30 @@
-from typing import Any, Tuple, Type, Union
+from typing import Any, Callable, Tuple, Type, Union
 
-__all__ = ("lenient_isinstance", "lenient_issubclass")
+__all__ = ("lenient_isinstance", "lenient_issubclass", "TypeLike")
 
 
-def lenient_isinstance(obj: Any, tp: Union[Type[Any], Tuple[Type[Any], ...]]) -> bool:
-    """Forgiving version of `isinstance` as we may check "unofficial" types like `TypedDict`"""
+TypeLike = Union[Type[Any], Union[Any]]
+OneOrManyTypes = Union[TypeLike, Tuple[TypeLike, ...]]
+
+
+def _lenient(f: Callable[[Any, OneOrManyTypes], bool], obj: Any, tp: TypeLike) -> bool:
     try:
-        return isinstance(obj, tp)
+        return f(obj, tp)
     except TypeError:
         return False
 
 
-def lenient_issubclass(obj: Any, tp: Union[Type[Any], Tuple[Type[Any], ...]]) -> bool:
+def lenient_isinstance(obj: Any, tp: OneOrManyTypes) -> bool:
+    """Forgiving version of `isinstance` as we may check "unofficial" types like `TypedDict`"""
+    if isinstance(tp, tuple):
+        return any(_lenient(isinstance, obj, t) for t in tp)
+    else:
+        return _lenient(isinstance, obj, tp)
+
+
+def lenient_issubclass(obj: Any, tp: OneOrManyTypes) -> bool:
     """Forgiving version of `issubclass` as we may check "unofficial" types like `TypedDict`"""
-    return lenient_isinstance(obj, type) and issubclass(obj, tp)
+    if isinstance(tp, tuple):
+        return any(_lenient(issubclass, obj, t) for t in tp)
+    else:
+        return _lenient(issubclass, obj, tp)

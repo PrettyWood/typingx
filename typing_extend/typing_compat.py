@@ -3,11 +3,11 @@ Module that handles differences between supported versions of Python
 for some methods / classes of the `typing` module
 """
 import sys
-from typing import Any, Optional, Tuple, Type, Union, cast
+from typing import Any, Optional, Tuple, cast
+
+from .utils import TypeLike
 
 __all__ = ("get_args", "get_origin", "is_typeddict", "TypedDict")
-
-TypeLike = Union[Type[Any], Union[Any]]
 
 
 def get_args(tp: TypeLike) -> Tuple[Any, ...]:
