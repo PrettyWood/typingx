@@ -1,6 +1,7 @@
 from typing import Any, Dict, List, Set, Union
 
-from .typing_compat import get_args, get_origin
+from .typing_compat import get_args, get_origin, is_typeddict
+from .utils import lenient_isinstance
 
 __all__ = ("extended_isinstance",)
 
@@ -10,7 +11,7 @@ def extended_isinstance(obj: Any, tp: Any) -> bool:
     if tp is Any:
         return True
 
-    if isinstance(tp, tuple):
+    if lenient_isinstance(tp, tuple):
         return any(extended_isinstance(obj, sub_tp) for sub_tp in tp)
 
     origin = get_origin(tp)
@@ -53,4 +54,13 @@ def extended_isinstance(obj: Any, tp: Any) -> bool:
     elif origin is type:
         return issubclass(obj, get_args(tp))
 
-    return isinstance(obj, tp)
+    # e.g. TypedDict('Movie', {'name': str, 'year': int})
+    elif is_typeddict(tp):
+        # ensure it's a dict that contains all the required keys
+        return (
+            isinstance(obj, dict)
+            and set(obj).issuperset(tp.__required_keys__)
+            and set(obj).issubset(tp.__annotations__)
+        )
+
+    return lenient_isinstance(obj, tp)

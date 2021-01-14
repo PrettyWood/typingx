@@ -2,7 +2,7 @@ from typing import Any, Dict, List, Optional, Set, Tuple, Type, Union
 
 import pytest
 
-from typing_extend import extended_isinstance
+from typing_extend import TypedDict, extended_isinstance
 
 
 class Pokemon:
@@ -139,6 +139,32 @@ def test_extended_isinstance_union(obj, tp, expected):
 )
 def test_extended_isinstance_type(obj, tp, expected):
     """It should support `Type`"""
+    assert extended_isinstance(obj, tp) is expected
+
+
+class FullMovie(TypedDict, total=True):
+    name: str
+    year: int
+
+
+class PartialMovie(TypedDict, total=False):
+    name: str
+    year: int
+
+
+@pytest.mark.parametrize(
+    "obj,tp,expected",
+    [
+        ({"name": "The Matrix", "year": 1999}, FullMovie, True),
+        ({"name": "The Matrix"}, FullMovie, False),
+        ({"name": "The Matrix", "year": 1999, "extra": "qwe"}, FullMovie, False),
+        ({"name": "The Matrix", "year": 1999}, PartialMovie, True),
+        ({"name": "The Matrix"}, PartialMovie, True),
+        ({"name": "The Matrix", "year": 1999, "extra": "qwe"}, PartialMovie, False),
+    ],
+)
+def test_extended_isinstance_typeddict(obj, tp, expected):
+    """It should support `TypeDict`"""
     assert extended_isinstance(obj, tp) is expected
 
 
