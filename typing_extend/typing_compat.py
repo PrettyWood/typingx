@@ -11,42 +11,46 @@ __all__ = ("get_args", "get_origin", "get_type_hints", "is_typeddict", "TypedDic
 
 
 def get_args(tp: TypeLike) -> Tuple[Any, ...]:
-    try:
+    # Python 3.8+
+    if sys.version_info >= (3, 8):
         from typing import get_args
 
         return get_args(tp)
-    except ImportError:
-        # Python 3.6 and 3.7
+
+    # Python 3.6 and 3.7
+    else:
         return cast(Tuple[Any, ...], getattr(tp, "__args__", ()))
 
 
 def get_origin(tp: TypeLike) -> Optional[TypeLike]:
-    try:
+    # Python 3.8+
+    if sys.version_info >= (3, 8):
         from typing import get_origin
 
         return get_origin(tp)
-    except ImportError:
-        # Python 3.7
-        if sys.version_info[:2] == (3, 7):
-            return getattr(tp, "__origin__", None)
-        # Python 3.6
-        else:
-            assert sys.version_info[:2] == (3, 6)
 
-            from typing import Dict, List, Set, Tuple, Type
+    # Python 3.7
+    elif sys.version_info[:2] == (3, 7):
+        return getattr(tp, "__origin__", None)
 
-            # In python 3.6, the origin of `List[str]` for example
-            # is `List` and not `list`. We hence need an explicit mapping...
-            typing_to_builtin_map = {
-                Dict: dict,
-                List: list,
-                Set: set,
-                Tuple: tuple,
-                Type: type,
-            }
+    # Python 3.6
+    else:
+        assert sys.version_info[:2] == (3, 6)
 
-            origin = getattr(tp, "__origin__", None)
-            return typing_to_builtin_map.get(origin, origin)
+        from typing import Dict, List, Set, Tuple, Type
+
+        # In python 3.6, the origin of `List[str]` for example
+        # is `List` and not `list`. We hence need an explicit mapping...
+        typing_to_builtin_map = {
+            Dict: dict,
+            List: list,
+            Set: set,
+            Tuple: tuple,
+            Type: type,
+        }
+
+        origin = getattr(tp, "__origin__", None)
+        return typing_to_builtin_map.get(origin, origin)
 
 
 def get_type_hints(
@@ -81,12 +85,14 @@ def get_type_hints(
 
 
 def is_typeddict(tp: TypeLike) -> bool:
-    try:
-        from typing import is_typeddict  # type: ignore[attr-defined]
+    # Python 3.10+
+    if sys.version_info >= (3, 10):
+        from typing import is_typeddict
 
-        return is_typeddict(tp)  # type: ignore[no-any-return]
-    except ImportError:
-        # Python 3.6 to Python 3.9
+        return is_typeddict(tp)
+
+    # Python 3.6 to Python 3.9
+    else:
         from .utils import lenient_issubclass
 
         return lenient_issubclass(tp, dict) and hasattr(tp, "__annotations__")
