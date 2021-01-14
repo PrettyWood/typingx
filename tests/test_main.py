@@ -1,8 +1,17 @@
-from typing import Any, Dict, List, Optional, Set, Tuple, Type, Union
-
 import pytest
 
-from typing_extend import TypedDict, extended_isinstance
+from typing_extend import (
+    Any,
+    Dict,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    Type,
+    TypedDict,
+    Union,
+    extended_isinstance,
+)
 
 
 class Pokemon:

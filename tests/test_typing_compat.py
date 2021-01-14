@@ -1,8 +1,6 @@
-from typing import Dict, List, Set, Tuple, Type
-
 import pytest
 
-from typing_extend import get_args, get_origin
+from typing_extend import Dict, List, Set, Tuple, Type, get_args, get_origin
 
 
 @pytest.mark.parametrize(
