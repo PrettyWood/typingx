@@ -1,6 +1,6 @@
 from typing import Any, Callable, Tuple, Type, Union
 
-__all__ = ("lenient_isinstance", "lenient_issubclass", "TypeLike")
+__all__ = ("TypeLike", "lenient_isinstance", "lenient_issubclass")
 
 
 TypeLike = Union[Type[Any], Union[Any]]

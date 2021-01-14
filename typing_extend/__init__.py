@@ -5,10 +5,9 @@ from .main import xisinstance
 from .typing_compat import TypedDict, get_args, get_origin, is_typeddict
 
 __all__ = (
+    # main methods
     "xisinstance",
-    "get_args",
-    "get_origin",
-    "is_typeddict",
+    # typing, typing_extensions or own backport
     "Any",
     "Dict",
     "List",
@@ -18,4 +17,7 @@ __all__ = (
     "Tuple",
     "Type",
     "TypedDict",
+    "get_args",
+    "get_origin",
+    "is_typeddict",
 )

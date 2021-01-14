@@ -7,7 +7,16 @@ from typing import Any, Callable, Dict, Optional, Tuple, cast
 
 from .utils import TypeLike
 
-__all__ = ("get_args", "get_origin", "get_type_hints", "is_typeddict", "TypedDict")
+__all__ = ("TypedDict", "get_args", "get_origin", "get_type_hints", "is_typeddict")
+
+
+if sys.version_info < (3, 9):
+    # Even though `TypedDict` is already in python 3.8,
+    # the class doesn't have `__required_keys__` and `__optional_keys__`,
+    # which prevents a perfect support
+    from typing_extensions import TypedDict
+else:
+    from typing import TypedDict
 
 
 def get_args(tp: TypeLike) -> Tuple[Any, ...]:
@@ -96,12 +105,3 @@ def is_typeddict(tp: TypeLike) -> bool:
         from .utils import lenient_issubclass
 
         return lenient_issubclass(tp, dict) and hasattr(tp, "__annotations__")
-
-
-if sys.version_info < (3, 9):
-    # Even though `TypedDict` is already in python 3.8,
-    # the class doesn't have `__required_keys__` and `__optional_keys__`,
-    # which prevents a perfect support
-    from typing_extensions import TypedDict
-else:
-    from typing import TypedDict
