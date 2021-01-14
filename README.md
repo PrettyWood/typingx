@@ -26,8 +26,8 @@ assert extended_isinstance({'a': 1, 'b': 2}, Dict[str, Any])
 
 # List
 assert extended_isinstance([1, 2, 3], List[int])
-assert not extended_isinstance([1, 2, 'q',], List[int])
-assert extended_isinstance([1, 2, 'q',], List[Union[str, int]])
+assert not extended_isinstance([1, 2, 'q'], List[int])
+assert extended_isinstance([1, 2, 'q'], List[Union[str, int]])
 
 # Set
 assert extended_isinstance({'a', 'b'}, Set[str])
@@ -37,4 +37,9 @@ assert not extended_isinstance({'a', 'b'}, Set[int])
 assert extended_isinstance((1, 2), Tuple[int, ...])
 assert extended_isinstance((1, 2), Tuple[int, int])
 assert not extended_isinstance((1, 2), Tuple[int, int, int])
+
+# Type
+assert extended_isinstance(BaseUser, Type[User])
+assert extended_isinstance(User, Type[User])
+assert not extended_isinstance(AnotherClass, Type[User])
 ```

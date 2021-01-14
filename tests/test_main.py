@@ -1,8 +1,20 @@
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Dict, List, Optional, Set, Tuple, Type, Union
 
 import pytest
 
 from typing_extend import extended_isinstance
+
+
+class Pokemon:
+    ...
+
+
+class Pika(Pokemon):
+    ...
+
+
+class Bulbi(Pokemon):
+    ...
 
 
 @pytest.mark.parametrize(
@@ -10,6 +22,10 @@ from typing_extend import extended_isinstance
     [
         (3, int, True),
         ("3", int, False),
+        (Pika(), Pika, True),
+        (Bulbi(), Pika, False),
+        (Pika(), Pokemon, True),
+        (Bulbi(), Pokemon, True),
     ],
 )
 def test_extended_isinstance_basic(obj, tp, expected):
@@ -107,6 +123,22 @@ def test_extended_isinstance_tuple(obj, tp, expected):
 )
 def test_extended_isinstance_union(obj, tp, expected):
     """It should support `Union` (and `Optional`)"""
+    assert extended_isinstance(obj, tp) is expected
+
+
+@pytest.mark.parametrize(
+    "obj,tp,expected",
+    [
+        (int, Type[int], True),
+        (type(3), Type[int], True),
+        (Pika, Type[Pika], True),
+        (Pika, Type[Pokemon], True),
+        (Bulbi, Type[Pika], False),
+        (Bulbi, Type[Pokemon], True),
+    ],
+)
+def test_extended_isinstance_type(obj, tp, expected):
+    """It should support `Type`"""
     assert extended_isinstance(obj, tp) is expected
 
 

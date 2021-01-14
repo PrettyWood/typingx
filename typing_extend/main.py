@@ -49,4 +49,8 @@ def extended_isinstance(obj: Any, tp: Any) -> bool:
                 extended_isinstance(item, item_tp) for item, item_tp in zip(obj, expected_types)
             )
 
+    # e.g. Type[int]
+    elif origin is type:
+        return issubclass(obj, get_args(tp))
+
     return isinstance(obj, tp)
