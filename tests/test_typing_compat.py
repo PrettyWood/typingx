@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Dict, List, Set, Tuple, Type
 
 import pytest
 
@@ -23,6 +23,9 @@ def test_get_args(tp, expected_args):
         (int, None),
         (List[int], list),
         (Dict[str, int], dict),
+        (Set[str], set),
+        (Tuple[int], tuple),
+        (Type[int], type),
     ],
 )
 def test_get_origin(tp, expected_origin):

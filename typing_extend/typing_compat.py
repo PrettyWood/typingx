@@ -26,6 +26,7 @@ else:
         List: list,
         Set: set,
         Tuple: tuple,
+        Type: type,
     }
 
     def get_args(tp: Type[Any]) -> Tuple[Any, ...]:
