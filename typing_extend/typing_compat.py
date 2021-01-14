@@ -3,11 +3,11 @@ Module that handles differences between supported versions of Python
 for some methods / classes of the `typing` module
 """
 import sys
-from typing import Any, Optional, Tuple, cast
+from typing import Any, Callable, Dict, Optional, Tuple, cast
 
 from .utils import TypeLike
 
-__all__ = ("get_args", "get_origin", "is_typeddict", "TypedDict")
+__all__ = ("get_args", "get_origin", "get_type_hints", "is_typeddict", "TypedDict")
 
 
 def get_args(tp: TypeLike) -> Tuple[Any, ...]:
@@ -47,6 +47,37 @@ def get_origin(tp: TypeLike) -> Optional[TypeLike]:
 
             origin = getattr(tp, "__origin__", None)
             return typing_to_builtin_map.get(origin, origin)
+
+
+def get_type_hints(
+    obj: Callable[..., Any],
+    globalns: Optional[Dict[str, Any]] = None,
+    localns: Optional[Dict[str, Any]] = None,
+    include_extras: bool = False,
+) -> Dict[str, Any]:
+    # Python 3.9+
+    if sys.version_info >= (3, 9):
+        from typing import get_type_hints
+
+        return get_type_hints(
+            obj, globalns=globalns, localns=localns, include_extras=include_extras
+        )
+
+    # Python 3.7 and 3.8
+    elif sys.version_info >= (3, 7):
+        from typing_extensions import get_type_hints
+
+        return get_type_hints(
+            obj, globalns=globalns, localns=localns, include_extras=include_extras
+        )
+
+    # Python 3.6
+    else:
+        assert sys.version_info[:2] == (3, 6)
+
+        from typing import get_type_hints
+
+        return get_type_hints(obj, globalns=globalns, localns=localns)
 
 
 def is_typeddict(tp: TypeLike) -> bool:

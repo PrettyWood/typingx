@@ -154,6 +154,7 @@ class PartialMovie(TypedDict, total=False):
     "obj,tp,expected",
     [
         ({"name": "The Matrix", "year": 1999}, FullMovie, True),
+        ({"name": "The Matrix", "year": "1999"}, FullMovie, False),
         ({"name": "The Matrix"}, FullMovie, False),
         ({"name": "The Matrix", "year": 1999, "extra": "qwe"}, FullMovie, False),
         ({"name": "The Matrix", "year": 1999}, PartialMovie, True),

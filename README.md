@@ -19,33 +19,33 @@ Extend `typing` functionalities
 from typing_extend import Any, Dict, List, Set, Tuple, Type, TypedDict, Union, xisinstance
 
 # Dict
-assert xisinstance({"a": 1, "b": 2}, Dict[str, int])
-assert not xisinstance({"a": 1, "b": 2}, Dict[str, str])
-assert not xisinstance({"a": 1, "b": 2}, Dict[int, str])
-assert xisinstance({"a": 1, "b": 2}, Dict[str, Any])
+assert xisinstance({"a": 1, "b": 2}, Dict[str, int]) is True
+assert xisinstance({"a": 1, "b": 2}, Dict[str, str]) is False
+assert xisinstance({"a": 1, "b": 2}, Dict[int, str]) is False
+assert xisinstance({"a": 1, "b": 2}, Dict[str, Any]) is True
 
 # List
-assert xisinstance([1, 2, 3], List[int])
-assert not xisinstance([1, 2, "q"], List[int])
-assert xisinstance([1, 2, "q"], List[Union[str, int]])
+assert xisinstance([1, 2, 3], List[int]) is True
+assert xisinstance([1, 2, "q"], List[int]) is False
+assert xisinstance([1, 2, "q"], List[Union[str, int]]) is True
 
 # Set
-assert xisinstance({"a", "b"}, Set[str])
-assert not xisinstance({"a", "b"}, Set[int])
+assert xisinstance({"a", "b"}, Set[str]) is True
+assert xisinstance({"a", "b"}, Set[int]) is False
 
 # Tuple
-assert xisinstance((1, 2), Tuple[int, ...])
-assert xisinstance((1, 2), Tuple[int, int])
-assert not xisinstance((1, 2), Tuple[int, int, int])
+assert xisinstance((1, 2), Tuple[int, ...]) is True
+assert xisinstance((1, 2), Tuple[int, int]) is True
+assert xisinstance((1, 2), Tuple[int, int, int]) is False
 
 # Type
 class User: ...
 class BaseUser(User): ...
 
-assert xisinstance(BaseUser, Type[BaseUser])
-assert xisinstance(BaseUser, Type[User])
-assert xisinstance(User, Type[User])
-assert not xisinstance(User, Type[BaseUser])
+assert xisinstance(BaseUser, Type[BaseUser]) is True
+assert xisinstance(BaseUser, Type[User]) is True
+assert xisinstance(User, Type[User]) is True
+assert xisinstance(User, Type[BaseUser]) is False
 
 # TypedDict
 FullMovie = TypedDict("FullMovie", {"name": str, "year": int})
@@ -54,11 +54,12 @@ class PartialMovie(TypedDict, total=False):
     name: str
     year: int
 
-assert xisinstance({"name": "The Matrix", "year": 1999}, FullMovie)
-assert not xisinstance({"name": "The Matrix"}, FullMovie)
-assert not xisinstance({"name": "The Matrix", "year": 1999, "extra": "qwe"}, FullMovie)
+assert xisinstance({"name": "The Matrix", "year": 1999}, FullMovie) is True
+assert xisinstance({"name": "The Matrix", "year": "1999"}, FullMovie) is False
+assert xisinstance({"name": "The Matrix"}, FullMovie) is False
+assert xisinstance({"name": "The Matrix", "year": 1999, "extra": "qwe"}, FullMovie) is False
 
-assert xisinstance({"name": "The Matrix", "year": 1999}, PartialMovie)
-assert xisinstance({"name": "The Matrix"}, PartialMovie)
-assert not xisinstance({"name": "The Matrix", "year": 1999, "extra": "qwe"}, PartialMovie)
+assert xisinstance({"name": "The Matrix", "year": 1999}, PartialMovie) is True
+assert xisinstance({"name": "The Matrix"}, PartialMovie) is True
+assert xisinstance({"name": "The Matrix", "year": 1999, "extra": "qwe"}, PartialMovie) is False
 ```

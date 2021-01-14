@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Set, Union
 
-from .typing_compat import get_args, get_origin, is_typeddict
+from .typing_compat import get_args, get_origin, get_type_hints, is_typeddict
 from .utils import lenient_isinstance
 
 __all__ = ("xisinstance",)
@@ -57,10 +57,14 @@ def xisinstance(obj: Any, tp: Any) -> bool:
     # e.g. TypedDict('Movie', {'name': str, 'year': int})
     elif is_typeddict(tp):
         # ensure it's a dict that contains all the required keys
-        return (
+        if not (
             isinstance(obj, dict)
             and set(obj).issuperset(tp.__required_keys__)
             and set(obj).issubset(tp.__annotations__)
-        )
+        ):
+            return False
+
+        resolved_annotations = get_type_hints(tp)
+        return all(xisinstance(v, resolved_annotations[k]) for k, v in obj.items())
 
     return lenient_isinstance(obj, tp)
