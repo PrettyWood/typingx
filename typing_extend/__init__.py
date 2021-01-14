@@ -1,11 +1,11 @@
 # flake8: noqa
 from typing import *
 
-from .main import extended_isinstance
+from .main import xisinstance
 from .typing_compat import TypedDict, get_args, get_origin, is_typeddict
 
 __all__ = (
-    "extended_isinstance",
+    "xisinstance",
     "get_args",
     "get_origin",
     "is_typeddict",

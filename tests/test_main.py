@@ -1,17 +1,6 @@
 import pytest
 
-from typing_extend import (
-    Any,
-    Dict,
-    List,
-    Optional,
-    Set,
-    Tuple,
-    Type,
-    TypedDict,
-    Union,
-    extended_isinstance,
-)
+from typing_extend import Any, Dict, List, Optional, Set, Tuple, Type, TypedDict, Union, xisinstance
 
 
 class Pokemon:
@@ -37,9 +26,9 @@ class Bulbi(Pokemon):
         (Bulbi(), Pokemon, True),
     ],
 )
-def test_extended_isinstance_basic(obj, tp, expected):
+def test_xisinstance_basic(obj, tp, expected):
     """It should work by default like builtin `isinstance`"""
-    assert extended_isinstance(obj, tp) is expected
+    assert xisinstance(obj, tp) is expected
 
 
 @pytest.mark.parametrize(
@@ -49,9 +38,9 @@ def test_extended_isinstance_basic(obj, tp, expected):
         ([1, "3"], Any, True),
     ],
 )
-def test_extended_isinstance_any(obj, tp, expected):
+def test_xisinstance_any(obj, tp, expected):
     """It should support `Any`"""
-    assert extended_isinstance(obj, tp) is expected
+    assert xisinstance(obj, tp) is expected
 
 
 @pytest.mark.parametrize(
@@ -64,9 +53,9 @@ def test_extended_isinstance_any(obj, tp, expected):
         ({"a": 1}, Dict[int, Any], False),
     ],
 )
-def test_extended_isinstance_dict(obj, tp, expected):
+def test_xisinstance_dict(obj, tp, expected):
     """It should support `Dict`"""
-    assert extended_isinstance(obj, tp) is expected
+    assert xisinstance(obj, tp) is expected
 
 
 @pytest.mark.parametrize(
@@ -82,9 +71,9 @@ def test_extended_isinstance_dict(obj, tp, expected):
         ([3, 4, 1.1, 2], List[float], False),
     ],
 )
-def test_extended_isinstance_list(obj, tp, expected):
+def test_xisinstance_list(obj, tp, expected):
     """It should support `List`"""
-    assert extended_isinstance(obj, tp) is expected
+    assert xisinstance(obj, tp) is expected
 
 
 @pytest.mark.parametrize(
@@ -98,9 +87,9 @@ def test_extended_isinstance_list(obj, tp, expected):
         ({"a", 1}, Set[Union[str, int]], True),
     ],
 )
-def test_extended_isinstance_set(obj, tp, expected):
+def test_xisinstance_set(obj, tp, expected):
     """It should support `Set`"""
-    assert extended_isinstance(obj, tp) is expected
+    assert xisinstance(obj, tp) is expected
 
 
 @pytest.mark.parametrize(
@@ -116,9 +105,9 @@ def test_extended_isinstance_set(obj, tp, expected):
         ((3,), Tuple[int, str], False),
     ],
 )
-def test_extended_isinstance_tuple(obj, tp, expected):
+def test_xisinstance_tuple(obj, tp, expected):
     """It should support `Tuple`"""
-    assert extended_isinstance(obj, tp) is expected
+    assert xisinstance(obj, tp) is expected
 
 
 @pytest.mark.parametrize(
@@ -130,9 +119,9 @@ def test_extended_isinstance_tuple(obj, tp, expected):
         (3, Union[int, str], True),
     ],
 )
-def test_extended_isinstance_union(obj, tp, expected):
+def test_xisinstance_union(obj, tp, expected):
     """It should support `Union` (and `Optional`)"""
-    assert extended_isinstance(obj, tp) is expected
+    assert xisinstance(obj, tp) is expected
 
 
 @pytest.mark.parametrize(
@@ -146,9 +135,9 @@ def test_extended_isinstance_union(obj, tp, expected):
         (Bulbi, Type[Pokemon], True),
     ],
 )
-def test_extended_isinstance_type(obj, tp, expected):
+def test_xisinstance_type(obj, tp, expected):
     """It should support `Type`"""
-    assert extended_isinstance(obj, tp) is expected
+    assert xisinstance(obj, tp) is expected
 
 
 class FullMovie(TypedDict, total=True):
@@ -172,9 +161,9 @@ class PartialMovie(TypedDict, total=False):
         ({"name": "The Matrix", "year": 1999, "extra": "qwe"}, PartialMovie, False),
     ],
 )
-def test_extended_isinstance_typeddict(obj, tp, expected):
+def test_xisinstance_typeddict(obj, tp, expected):
     """It should support `TypeDict`"""
-    assert extended_isinstance(obj, tp) is expected
+    assert xisinstance(obj, tp) is expected
 
 
 Number = Union[int, float]
@@ -189,6 +178,6 @@ Number = Union[int, float]
         ([[3, 4, "q"], ["q", "w"]], List[Union[List[int], List[str]]], False),
     ],
 )
-def test_extended_isinstance_mix(obj, tp, expected):
+def test_xisinstance_mix(obj, tp, expected):
     """It should support a mix of all those types"""
-    assert extended_isinstance(obj, tp) is expected
+    assert xisinstance(obj, tp) is expected
