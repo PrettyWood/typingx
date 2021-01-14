@@ -23,6 +23,7 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = "^3.6.1"
+typing_extensions = { version = "^3.7.4.3", python = "<3.9" }
 
 [tool.poetry.dev-dependencies]
 black = "^20.8b1"
