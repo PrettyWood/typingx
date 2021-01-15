@@ -16,7 +16,7 @@ Extend `typing` functionalities
 ## Usage
 ```python
 # By default `typing_extend` forwards most `typing` types
-from typing_extend import Any, Dict, List, Set, Tuple, Type, TypedDict, Union, xisinstance
+from typing_extend import Any, Dict, List, Literal, Set, Tuple, Type, TypedDict, Union, xisinstance
 
 # Dict
 assert xisinstance({"a": 1, "b": 2}, Dict[str, int]) is True
@@ -28,6 +28,13 @@ assert xisinstance({"a": 1, "b": 2}, Dict[str, Any]) is True
 assert xisinstance([1, 2, 3], List[int]) is True
 assert xisinstance([1, 2, "q"], List[int]) is False
 assert xisinstance([1, 2, "q"], List[Union[str, int]]) is True
+
+# Literal
+assert xisinstance("pika", Literal["pika"]) is True
+assert xisinstance(Literal["pika"], Literal["pika"]) is True
+assert xisinstance("bulbi", Literal["pika"]) is False
+assert xisinstance("bulbi", Literal["pika", Literal[Literal["bulbi"]]]) is True
+assert xisinstance(Literal["pika", "bulbi"], Literal["bulbi", "pika", "cara"]) is True
 
 # Set
 assert xisinstance({"a", "b"}, Set[str]) is True

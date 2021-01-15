@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Set, Union
 
-from .typing_compat import get_args, get_origin, get_type_hints, is_typeddict
+from .typing_compat import get_args, get_origin, get_type_hints, is_literal, is_typeddict
 from .utils import lenient_isinstance
 
 __all__ = ("xisinstance",)
@@ -66,5 +66,10 @@ def xisinstance(obj: Any, tp: Any) -> bool:
 
         resolved_annotations = get_type_hints(tp)
         return all(xisinstance(v, resolved_annotations[k]) for k, v in obj.items())
+
+    # e.g. Literal['Pika']
+    elif is_literal(tp):
+        values_to_check = get_args(obj) if is_literal(obj) else (obj,)
+        return all(v in get_args(tp) for v in values_to_check)
 
     return lenient_isinstance(obj, tp)

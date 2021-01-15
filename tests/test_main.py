@@ -1,6 +1,18 @@
 import pytest
 
-from typing_extend import Any, Dict, List, Optional, Set, Tuple, Type, TypedDict, Union, xisinstance
+from typing_extend import (
+    Any,
+    Dict,
+    List,
+    Literal,
+    Optional,
+    Set,
+    Tuple,
+    Type,
+    TypedDict,
+    Union,
+    xisinstance,
+)
 
 
 class Pokemon:
@@ -164,6 +176,23 @@ class PartialMovie(TypedDict, total=False):
 )
 def test_xisinstance_typeddict(obj, tp, expected):
     """It should support `TypeDict`"""
+    assert xisinstance(obj, tp) is expected
+
+
+@pytest.mark.parametrize(
+    "obj,tp,expected",
+    [
+        ("pika", Literal["pika"], True),
+        (Literal["pika"], Literal["pika"], True),
+        ("bulbi", Literal["pika"], False),
+        ("bulbi", Literal["pika", "bulbi"], True),
+        ("bulbi", Literal["pika", Literal[Literal["bulbi"]]], True),
+        (Literal["pika", "bulbi"], Literal["bulbi", "pika"], True),
+        (Literal["pika", "bulbi"], Literal["bulbi", "pika", "cara"], True),
+    ],
+)
+def test_xisinstance_literal(obj, tp, expected):
+    """It should support `Literal`"""
     assert xisinstance(obj, tp) is expected
 
 
