@@ -4,6 +4,7 @@ from typing_extend import (
     Any,
     Dict,
     List,
+    Literal,
     NoneType,
     Optional,
     Set,
@@ -34,6 +35,8 @@ class FullMovie(TypedDict):
         (Set[str], (str,)),
         (Type[int], (int,)),
         (FullMovie, ()),
+        (Literal["pika"], ("pika",)),
+        (Literal["pika", Literal[Literal["bulbi"]]], ("pika", "bulbi")),
     ],
 )
 def test_get_args(tp, expected_args):
@@ -53,6 +56,8 @@ def test_get_args(tp, expected_args):
         (Tuple[int], tuple),
         (Type[int], type),
         (FullMovie, None),
+        (Literal["pika"], Literal),
+        (Literal["pika", Literal[Literal["bulbi"]]], Literal),
     ],
 )
 def test_get_origin(tp, expected_origin):
