@@ -7,8 +7,10 @@ from typing import Any, Callable, Dict, Optional, Tuple, cast
 
 from .utils import TypeLike
 
-__all__ = ("TypedDict", "get_args", "get_origin", "get_type_hints", "is_typeddict")
+__all__ = ("NoneType", "TypedDict", "get_args", "get_origin", "get_type_hints", "is_typeddict")
 
+
+NoneType = type(None)
 
 if sys.version_info < (3, 9):
     # Even though `TypedDict` is already in python 3.8,
