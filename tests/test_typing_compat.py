@@ -12,6 +12,7 @@ from typing_extend import (
     Type,
     TypedDict,
     Union,
+    XTuple,
     get_args,
     get_origin,
     is_typeddict,
@@ -37,6 +38,10 @@ class FullMovie(TypedDict):
         (FullMovie, ()),
         (Literal["pika"], ("pika",)),
         (Literal["pika", Literal[Literal["bulbi"]]], ("pika", "bulbi")),
+        (XTuple[str], (str,)),
+        (XTuple[str, int], (str, int)),
+        (XTuple[str, int, ...], (str, int, ...)),
+        (XTuple[str, int, ..., bool], (str, int, ..., bool)),
     ],
 )
 def test_get_args(tp, expected_args):
@@ -58,6 +63,7 @@ def test_get_args(tp, expected_args):
         (FullMovie, None),
         (Literal["pika"], Literal),
         (Literal["pika", Literal[Literal["bulbi"]]], Literal),
+        (XTuple[str, int, ...], tuple),
     ],
 )
 def test_get_origin(tp, expected_origin):

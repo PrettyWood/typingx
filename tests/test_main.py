@@ -11,6 +11,7 @@ from typing_extend import (
     Type,
     TypedDict,
     Union,
+    XTuple,
     xisinstance,
 )
 
@@ -118,6 +119,29 @@ def test_xisinstance_set(obj, tp, expected):
     ],
 )
 def test_xisinstance_tuple(obj, tp, expected):
+    """It should support `Tuple`"""
+    assert xisinstance(obj, tp) is expected
+
+
+@pytest.mark.parametrize(
+    "obj,tp,expected",
+    [
+        ((3,), XTuple, True),
+        ((3,), XTuple[Any], True),
+        ((3,), XTuple[int], True),
+        ((3,), XTuple[int, ...], True),
+        ((3,), XTuple[int, int], False),
+        ((3,), XTuple[str], False),
+        ((3, "pika"), XTuple[int, str, ...], True),
+        ((3, "pika", "bulbi"), XTuple[int, str, ...], True),
+        ((3, "pika", "bulbi", "cara"), XTuple[int, str, ...], True),
+        ((3, "pika", "bulbi", "cara"), XTuple[int, str, ..., bool], False),
+        ((3, "pika", "bulbi", "cara", True), XTuple[int, str, ..., bool], True),
+        ((3, "pika", "bulbi", "cara", 3), XTuple[int, str, ..., bool], False),
+        ((3, "pika", "bulbi", "cara", True, False), XTuple[int, str, ..., bool, ...], True),
+    ],
+)
+def test_xisinstance_xtuple(obj, tp, expected):
     """It should support `Tuple`"""
     assert xisinstance(obj, tp) is expected
 

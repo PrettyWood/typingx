@@ -1,5 +1,6 @@
 from typing import Any, Dict, List, Set, Union
 
+from .types import XTuple
 from .typing_compat import get_args, get_origin, get_type_hints, is_literal, is_typeddict
 from .utils import lenient_isinstance
 
@@ -39,16 +40,30 @@ def xisinstance(obj: Any, tp: Any) -> bool:
 
         return all(xisinstance(x, get_args(tp)) for x in obj)
 
-    # e.g. Tuple[int, ...]
+    # e.g. Tuple[int, ...] or XTuple[int, str, ...]
     elif origin is tuple:
         expected_types = get_args(tp) or (Any, ...)
 
-        if len(expected_types) == 2 and expected_types[1] is ...:
-            return all(xisinstance(item, expected_types[0]) for item in obj)
+        current_index = 0
+        for item in obj:
+            if expected_types[current_index] is ...:
+                # Check first with previous type...
+                if xisinstance(item, expected_types[current_index - 1]):
+                    continue
+
+                # ...else check with a new type
+                if xisinstance(item, expected_types[current_index + 1]):
+                    current_index += 2
+                    continue
+            else:
+                if xisinstance(item, expected_types[current_index]):
+                    current_index += 1
+                    continue
+
+            return False
         else:
-            return len(expected_types) == len(obj) and all(
-                xisinstance(item, item_tp) for item, item_tp in zip(obj, expected_types)
-            )
+            # Check remaining types
+            return expected_types[current_index:] in ((), (...,))
 
     # e.g. Type[int]
     elif origin is type:
@@ -71,5 +86,9 @@ def xisinstance(obj: Any, tp: Any) -> bool:
     elif is_literal(tp):
         values_to_check = get_args(obj) if is_literal(obj) else (obj,)
         return all(v in get_args(tp) for v in values_to_check)
+
+    # plain `XTuple`
+    elif tp is XTuple:
+        tp = tuple
 
     return lenient_isinstance(obj, tp)

@@ -5,7 +5,9 @@
 [![versions](https://img.shields.io/pypi/pyversions/typing-extend.svg)](https://github.com/PrettyWood/typing-extend)
 [![license](https://img.shields.io/github/license/PrettyWood/typing-extend.svg)](https://github.com/PrettyWood/typing-extend/blob/master/LICENSE)
 
-Extend `typing` functionalities
+Extend `typing` functionalities with
+- `xisinstance`: like `isinstance` but with `typing` types
+- `XTuple`: an improved version of `Tuple` (mimic TypeScript version)
 
 ## Installation
 
@@ -16,7 +18,7 @@ Extend `typing` functionalities
 ## Usage
 ```python
 # By default `typing_extend` forwards most `typing` types
-from typing_extend import Any, Dict, List, Literal, Set, Tuple, Type, TypedDict, Union, xisinstance
+from typing_extend import Any, Dict, List, Literal, Set, Tuple, Type, TypedDict, Union, XTuple, xisinstance
 
 # Dict
 assert xisinstance({"a": 1, "b": 2}, Dict[str, int]) is True
@@ -44,6 +46,14 @@ assert xisinstance({"a", "b"}, Set[int]) is False
 assert xisinstance((1, 2), Tuple[int, ...]) is True
 assert xisinstance((1, 2), Tuple[int, int]) is True
 assert xisinstance((1, 2), Tuple[int, int, int]) is False
+
+# XTuple
+assert xisinstance((3, "pika", "bulbi"), XTuple[int, str, ...]) is True
+assert xisinstance((3, "pika", "bulbi", "cara"), XTuple[int, str, ...]) is True
+assert xisinstance((3, "pika", "bulbi", "cara"), XTuple[int, str, ..., bool]) is False
+assert xisinstance((3, "pika", "bulbi", "cara", True), XTuple[int, str, ..., bool]) is True
+assert xisinstance((3, "pika", "bulbi", "cara", 3), XTuple[int, str, ..., bool]) is False
+assert xisinstance((3, "pika", "bulbi", "cara", True, False), XTuple[int, str, ..., bool, ...]) is True
 
 # Type
 class User: ...
