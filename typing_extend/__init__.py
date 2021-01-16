@@ -2,7 +2,7 @@
 from typing import *
 
 from .main import xisinstance
-from .types import XTuple
+from .types import XList, XTuple
 from .typing_compat import (
     Literal,
     NoneType,
@@ -28,6 +28,7 @@ __all__ = (
     "Tuple",
     "Type",
     "TypedDict",
+    "XList",
     "XTuple",
     "get_args",
     "get_origin",

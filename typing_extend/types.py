@@ -3,7 +3,27 @@ import typing as T
 
 from .utils import OneOrManyTypes
 
-__all__ = ("XTuple",)
+__all__ = (
+    "XList",
+    "XTuple",
+)
+
+
+class XListMeta(type):
+    def __getitem__(self, params: OneOrManyTypes) -> T.Type["XList"]:
+        if not isinstance(params, tuple):
+            params = (params,)
+
+        if sys.version_info >= (3, 7):
+            xlist_cls = T._GenericAlias(list, params, name="XList")  # type: ignore[attr-defined]
+        else:
+            xlist_cls = type("XList", (), {"__args__": params, "__origin__": list})
+
+        return T.cast(T.Type["XList"], xlist_cls)
+
+
+class XList(metaclass=XListMeta):
+    ...
 
 
 class XTupleMeta(type):

@@ -18,7 +18,7 @@ It hences provides:
 but also:
 - `xisinstance`: like `isinstance` but with `typing` types
 - extra types:
-  * `XTuple`: an improved version of `Tuple` inspired by TypeScript version
+  * `XList` and `XTuple`: more sophisticated versions of `List` and `Tuple` to add `...` anywhere in the parameters
 
 ## Installation
 
@@ -38,6 +38,7 @@ from typing_extend import (
     Type,
     TypedDict,
     Union,
+    XList,
     XTuple,
     xisinstance,
 )
@@ -52,6 +53,14 @@ assert xisinstance({"a": 1, "b": 2}, Dict[str, Any]) is True
 assert xisinstance([1, 2, 3], List[int]) is True
 assert xisinstance([1, 2, "q"], List[int]) is False
 assert xisinstance([1, 2, "q"], List[Union[str, int]]) is True
+
+# XList
+assert xisinstance([1, 2, 3, 4], XList[int]) is True
+assert xisinstance([1, 2, "q"], XList[int, ..., str]) is True
+assert xisinstance([1, 2, "q", "w", "e"], XList[int, ..., str]) is False
+assert xisinstance([1, 2, "q", "w", "e"], XList[int, ..., str, ...]) is True
+assert xisinstance([1, 2, "q", "w", b"xyz", "e"], XList[int, ..., str, ...]) is False
+assert xisinstance([1, 2, "q", "w", b"xyz", "e"], XList[int, ..., Union[str, bytes], ...]) is True
 
 # Literal
 assert xisinstance("a", Literal["a"]) is True

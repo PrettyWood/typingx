@@ -1,8 +1,8 @@
-from typing import Any, Dict, List, Set, Union
+from typing import Any, Dict, List, Sequence, Set, Union
 
-from .types import XTuple
+from .types import XList, XTuple
 from .typing_compat import get_args, get_origin, get_type_hints, is_literal, is_typeddict
-from .utils import lenient_isinstance
+from .utils import TypeLike, lenient_isinstance
 
 __all__ = ("xisinstance",)
 
@@ -30,40 +30,25 @@ def xisinstance(obj: Any, tp: Any) -> bool:
             xisinstance(value, values_type) for value in obj.values()
         )
 
-    # e.g. List[str] or Set[str]
-    elif origin in {list, set}:
+    # e.g. List[str] or XList[int, str, ...]
+    elif origin is list:
         # With recent python versions, `get_args` returns `(~T,)`, which we want to handle easily
         if tp is List:
             tp = List[Any]
-        elif tp is Set:
+
+        return _is_valid_sequence(obj, tp, is_list=True)
+
+    # e.g. Set[str]
+    elif origin is set:
+        # With recent python versions, `get_args` returns `(~T,)`, which we want to handle easily
+        if tp is Set:
             tp = Set[Any]
 
         return all(xisinstance(x, get_args(tp)) for x in obj)
 
     # e.g. Tuple[int, ...] or XTuple[int, str, ...]
     elif origin is tuple:
-        expected_types = get_args(tp) or (Any, ...)
-
-        current_index = 0
-        for item in obj:
-            if expected_types[current_index] is ...:
-                # Check first with previous type...
-                if xisinstance(item, expected_types[current_index - 1]):
-                    continue
-
-                # ...else check with a new type
-                if xisinstance(item, expected_types[current_index + 1]):
-                    current_index += 2
-                    continue
-            else:
-                if xisinstance(item, expected_types[current_index]):
-                    current_index += 1
-                    continue
-
-            return False
-        else:
-            # Check remaining types
-            return expected_types[current_index:] in ((), (...,))
+        return _is_valid_sequence(obj, tp, is_list=False)
 
     # e.g. Type[int]
     elif origin is type:
@@ -87,8 +72,49 @@ def xisinstance(obj: Any, tp: Any) -> bool:
         values_to_check = get_args(obj) if is_literal(obj) else (obj,)
         return all(v in get_args(tp) for v in values_to_check)
 
+    # plain `XList`
+    elif tp is XList:
+        tp = list
+
     # plain `XTuple`
     elif tp is XTuple:
         tp = tuple
 
     return lenient_isinstance(obj, tp)
+
+
+def _is_valid_sequence(obj: Sequence[Any], tp: TypeLike, *, is_list: bool) -> bool:
+    """
+    Check that a sequence respects a type with args like [str], [str, int], [str, ...]
+    but also args like [str, int, ...] or even [str, int, ..., bool, ..., float]
+    """
+    expected_types = get_args(tp) or (Any, ...)
+
+    # We consider expected types of `List[int]` as [int, ...]
+    if is_list and len(expected_types) == 1:
+        expected_types += (...,)
+
+    current_index = 0
+    for item in obj:
+
+        try:
+            if expected_types[current_index] is ...:
+                # Check first with previous type...
+                if xisinstance(item, expected_types[current_index - 1]):
+                    continue
+
+                # ...else check with a new type
+                if xisinstance(item, expected_types[current_index + 1]):
+                    current_index += 2
+                    continue
+            else:
+                if xisinstance(item, expected_types[current_index]):
+                    current_index += 1
+                    continue
+        except IndexError:
+            return False
+
+        return False
+    else:
+        # Check remaining types
+        return expected_types[current_index:] in ((), (...,))

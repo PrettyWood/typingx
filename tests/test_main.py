@@ -11,6 +11,7 @@ from typing_extend import (
     Type,
     TypedDict,
     Union,
+    XList,
     XTuple,
     xisinstance,
 )
@@ -126,6 +127,31 @@ def test_xisinstance_tuple(obj, tp, expected):
 @pytest.mark.parametrize(
     "obj,tp,expected",
     [
+        ([3], XList, True),
+        ([3], XList[Any], True),
+        ([3], XList[int], True),
+        ([3, 4, 5], XList[int], True),
+        ([3, "pika"], XList[int, int], False),
+        ([3], XList[str], False),
+        ([3, "pika"], XList[int, str, ...], True),
+        ([1, 2, "q", "w", "e"], XList[int, ..., str], False),
+        ([1, 2, "q", "w", "e"], XList[int, ..., str, ...], True),
+        ([3, "pika", "bulbi"], XList[int, str, ...], True),
+        ([3, "pika", "bulbi", "cara"], XList[int, str, ...], True),
+        ([3, "pika", "bulbi", "cara"], XList[int, str, ..., bool], False),
+        ([3, "pika", "bulbi", "cara", True], XList[int, str, ..., bool], True),
+        ([3, "pika", "bulbi", "cara", 3], XList[int, str, ..., bool], False),
+        ([3, "pika", "bulbi", "cara", True, False], XList[int, str, ..., bool, ...], True),
+    ],
+)
+def test_xisinstance_xlist(obj, tp, expected):
+    """It should support `XList`"""
+    assert xisinstance(obj, tp) is expected
+
+
+@pytest.mark.parametrize(
+    "obj,tp,expected",
+    [
         ((3,), XTuple, True),
         ((3,), XTuple[Any], True),
         ((3,), XTuple[int], True),
@@ -142,7 +168,7 @@ def test_xisinstance_tuple(obj, tp, expected):
     ],
 )
 def test_xisinstance_xtuple(obj, tp, expected):
-    """It should support `Tuple`"""
+    """It should support `XTuple`"""
     assert xisinstance(obj, tp) is expected
 
 
