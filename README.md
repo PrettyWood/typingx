@@ -5,9 +5,20 @@
 [![versions](https://img.shields.io/pypi/pyversions/typing-extend.svg)](https://github.com/PrettyWood/typing-extend)
 [![license](https://img.shields.io/github/license/PrettyWood/typing-extend.svg)](https://github.com/PrettyWood/typing-extend/blob/master/LICENSE)
 
-Extend `typing` functionalities with
+`typing` is great but it changed a lot since 3.6 and it's not over!
+
+This library purpose is to have a consistent behaviour for all those versions to mimic the most recent one
+and go even further with `typing` (and `typing_extensions`).
+
+It hences provides:
+- `get_args` and `get_origin` for python `3.6` to `3.9` that mimic `3.10` behaviour
+- `is_literal`, `is_typeddict` helpers
+- most `typing` types but with homogeneous behaviour (e.g. with `3.8`, `typing.TypedDict` won't store information to distinguish optional and required keys)
+
+but also:
 - `xisinstance`: like `isinstance` but with `typing` types
-- `XTuple`: an improved version of `Tuple` (mimic TypeScript version)
+- extra types:
+  * `XTuple`: an improved version of `Tuple` inspired by TypeScript version
 
 ## Installation
 
@@ -17,8 +28,19 @@ Extend `typing` functionalities with
 
 ## Usage
 ```python
-# By default `typing_extend` forwards most `typing` types
-from typing_extend import Any, Dict, List, Literal, Set, Tuple, Type, TypedDict, Union, XTuple, xisinstance
+from typing_extend import (
+    Any,
+    Dict,
+    List,
+    Literal,
+    Set,
+    Tuple,
+    Type,
+    TypedDict,
+    Union,
+    XTuple,
+    xisinstance,
+)
 
 # Dict
 assert xisinstance({"a": 1, "b": 2}, Dict[str, int]) is True
@@ -32,11 +54,11 @@ assert xisinstance([1, 2, "q"], List[int]) is False
 assert xisinstance([1, 2, "q"], List[Union[str, int]]) is True
 
 # Literal
-assert xisinstance("pika", Literal["pika"]) is True
-assert xisinstance(Literal["pika"], Literal["pika"]) is True
-assert xisinstance("bulbi", Literal["pika"]) is False
-assert xisinstance("bulbi", Literal["pika", Literal[Literal["bulbi"]]]) is True
-assert xisinstance(Literal["pika", "bulbi"], Literal["bulbi", "pika", "cara"]) is True
+assert xisinstance("a", Literal["a"]) is True
+assert xisinstance(Literal["a"], Literal["a"]) is True
+assert xisinstance("b", Literal["a"]) is False
+assert xisinstance("b", Literal["a", Literal[Literal["b"]]]) is True
+assert xisinstance(Literal["a", "b"], Literal["b", "a", "c"]) is True
 
 # Set
 assert xisinstance({"a", "b"}, Set[str]) is True
@@ -48,12 +70,12 @@ assert xisinstance((1, 2), Tuple[int, int]) is True
 assert xisinstance((1, 2), Tuple[int, int, int]) is False
 
 # XTuple
-assert xisinstance((3, "pika", "bulbi"), XTuple[int, str, ...]) is True
-assert xisinstance((3, "pika", "bulbi", "cara"), XTuple[int, str, ...]) is True
-assert xisinstance((3, "pika", "bulbi", "cara"), XTuple[int, str, ..., bool]) is False
-assert xisinstance((3, "pika", "bulbi", "cara", True), XTuple[int, str, ..., bool]) is True
-assert xisinstance((3, "pika", "bulbi", "cara", 3), XTuple[int, str, ..., bool]) is False
-assert xisinstance((3, "pika", "bulbi", "cara", True, False), XTuple[int, str, ..., bool, ...]) is True
+assert xisinstance((3, "a", "b"), XTuple[int, str, ...]) is True
+assert xisinstance((3, "a", "b", "c"), XTuple[int, str, ...]) is True
+assert xisinstance((3, "a", "b", "c"), XTuple[int, str, ..., bool]) is False
+assert xisinstance((3, "a", "b", "c", True), XTuple[int, str, ..., bool]) is True
+assert xisinstance((3, "a", "b", "c", 3), XTuple[int, str, ..., bool]) is False
+assert xisinstance((3, "a", "b", "c", True, False), XTuple[int, str, ..., bool, ...]) is True
 
 # Type
 class User: ...
