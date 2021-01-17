@@ -212,9 +212,17 @@ class PartialMovie(TypedDict, total=False):
     year: int
 
 
+class StrExtra(TypedDict):
+    a: int
+    b: float
+    __extra__: str
+
+
 @pytest.mark.parametrize(
     "obj,tp,expected",
     [
+        ((1,), FullMovie, False),
+        ({1: "a", "b": "c"}, FullMovie, False),
         ({"name": "The Matrix", "year": 1999}, FullMovie, True),
         ({"name": "The Matrix", "year": "1999"}, FullMovie, False),
         ({"name": "The Matrix"}, FullMovie, False),
@@ -222,6 +230,10 @@ class PartialMovie(TypedDict, total=False):
         ({"name": "The Matrix", "year": 1999}, PartialMovie, True),
         ({"name": "The Matrix"}, PartialMovie, True),
         ({"name": "The Matrix", "year": 1999, "extra": "qwe"}, PartialMovie, False),
+        ({"a": 1}, StrExtra, False),
+        ({"a": 1, "b": 0.1}, StrExtra, True),
+        ({"a": 1, "b": 0.1, "c": "pika", "d": "bulbi"}, StrExtra, True),
+        ({"a": 1, "b": 0.1, "c": "pika", "d": 1}, StrExtra, False),
     ],
 )
 def test_xisinstance_typeddict(obj, tp, expected):

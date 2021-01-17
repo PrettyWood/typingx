@@ -10,7 +10,7 @@
 This library purpose is to have a consistent behaviour for all those versions to mimic the most recent one
 and go even further with `typing` (and `typing_extensions`).
 
-It hences provides:
+It provides:
 - `get_args` and `get_origin` for python `3.6` to `3.9` that mimic `3.10` behaviour
 - `is_literal`, `is_typeddict` helpers
 - most `typing` types but with homogeneous behaviour (e.g. with `3.8`, `typing.TypedDict` won't store information to distinguish optional and required keys)
@@ -19,6 +19,8 @@ but also:
 - `xisinstance`: like `isinstance` but with `typing` types
 - extra types:
   * `XList` and `XTuple`: more sophisticated versions of `List` and `Tuple` to add `...` anywhere in the parameters
+- extanded types:
+  * `TypedDict` has a `__extra__` field (value can be changed) to allow type checking on optional fields
 
 ## Installation
 
@@ -102,6 +104,11 @@ class PartialMovie(TypedDict, total=False):
     name: str
     year: int
 
+class ExtraMovie(TypedDict):
+    name: str
+    year: int
+    __extra__: str
+
 assert xisinstance({"name": "The Matrix", "year": 1999}, FullMovie) is True
 assert xisinstance({"name": "The Matrix", "year": "1999"}, FullMovie) is False
 assert xisinstance({"name": "The Matrix"}, FullMovie) is False
@@ -110,4 +117,8 @@ assert xisinstance({"name": "The Matrix", "year": 1999, "extra": "qwe"}, FullMov
 assert xisinstance({"name": "The Matrix", "year": 1999}, PartialMovie) is True
 assert xisinstance({"name": "The Matrix"}, PartialMovie) is True
 assert xisinstance({"name": "The Matrix", "year": 1999, "extra": "qwe"}, PartialMovie) is False
+
+assert xisinstance({"name": "The Matrix", "year": 1999}, ExtraMovie) is True
+assert xisinstance({"name": "The Matrix", "year": 1999, "q": "w", "e": "r"}, ExtraMovie) is True
+assert xisinstance({"name": "The Matrix", "year": 1999, "q": "w", "e": 1}, ExtraMovie) is False
 ```

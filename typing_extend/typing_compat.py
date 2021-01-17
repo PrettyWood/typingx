@@ -118,8 +118,21 @@ def get_type_hints(
 #######################################
 # TypedDict
 #######################################
-if sys.version_info >= (3, 9):
+if T.TYPE_CHECKING:
+
+    class TypedDict(T.Dict[str, T.Any]):
+        __annotations__: T.Dict[str, T.Type[T.Any]]
+        __total__: bool
+        __required_keys__: T.FrozenSet[str]
+        __optional_keys__: T.FrozenSet[str]
+
+        def __call__(self, *args: T.Any, **kwargs: T.Any) -> T.Any:
+            ...
+
+
+elif sys.version_info >= (3, 9):
     TypedDict = T.TypedDict
+
 else:
     # Even though `TypedDict` is already in python 3.8,
     # the class doesn't have `__required_keys__` and `__optional_keys__`,

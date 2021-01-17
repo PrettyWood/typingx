@@ -1,10 +1,12 @@
 from typing import Any, Dict, List, Sequence, Set, Union
 
 from .types import XList, XTuple
-from .typing_compat import get_args, get_origin, get_type_hints, is_literal, is_typeddict
+from .typing_compat import TypedDict, get_args, get_origin, get_type_hints, is_literal, is_typeddict
 from .utils import TypeLike, lenient_isinstance
 
 __all__ = ("xisinstance",)
+
+TYPED_DICT_EXTRA_KEY = "__extra__"
 
 
 def xisinstance(obj: Any, tp: Any) -> bool:
@@ -56,16 +58,10 @@ def xisinstance(obj: Any, tp: Any) -> bool:
 
     # e.g. TypedDict('Movie', {'name': str, 'year': int})
     elif is_typeddict(tp):
-        # ensure it's a dict that contains all the required keys
-        if not (
-            isinstance(obj, dict)
-            and set(obj).issuperset(tp.__required_keys__)
-            and set(obj).issubset(tp.__annotations__)
-        ):
+        if not isinstance(obj, dict) and all(isinstance(x, str) for x in obj):
             return False
 
-        resolved_annotations = get_type_hints(tp)
-        return all(xisinstance(v, resolved_annotations[k]) for k, v in obj.items())
+        return _is_valid_typeddict(obj, tp)
 
     # e.g. Literal['Pika']
     elif is_literal(tp):
@@ -118,3 +114,31 @@ def _is_valid_sequence(obj: Sequence[Any], tp: TypeLike, *, is_list: bool) -> bo
     else:
         # Check remaining types
         return expected_types[current_index:] in ((), (...,))
+
+
+def _is_valid_typeddict(obj: Dict[str, Any], tp: TypedDict) -> bool:
+    # ensure it's a dict that contains all the required keys but extra values are allowed
+    resolved_annotations = get_type_hints(tp)
+
+    if TYPED_DICT_EXTRA_KEY in resolved_annotations:
+        rest_type = resolved_annotations.pop(TYPED_DICT_EXTRA_KEY)
+        required_keys = set(tp.__required_keys__) - {TYPED_DICT_EXTRA_KEY}
+        if not set(obj).issuperset(required_keys):
+            return False
+
+        are_required_keys_valid = all(
+            xisinstance(v, resolved_annotations[k]) for k, v in obj.items() if k in required_keys
+        )
+        are_extra_keys_valid = all(
+            xisinstance(v, rest_type) for k, v in obj.items() if k not in required_keys
+        )
+        return are_required_keys_valid and are_extra_keys_valid
+
+    else:
+        # ensure it's a dict that contains all the required keys without extra key
+        if not (
+            set(obj).issuperset(tp.__required_keys__) and set(obj).issubset(tp.__annotations__)
+        ):
+            return False
+
+        return all(xisinstance(v, resolved_annotations[k]) for k, v in obj.items())
