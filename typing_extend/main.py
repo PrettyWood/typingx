@@ -58,7 +58,7 @@ def xisinstance(obj: Any, tp: Any) -> bool:
 
     # e.g. TypedDict('Movie', {'name': str, 'year': int})
     elif is_typeddict(tp):
-        if not isinstance(obj, dict) and all(isinstance(x, str) for x in obj):
+        if not (isinstance(obj, dict) and all(isinstance(k, str) for k in obj)):
             return False
 
         return _is_valid_typeddict(obj, tp)
