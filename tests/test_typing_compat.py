@@ -1,19 +1,19 @@
 import pytest
 
-from typing_extend import (
+from typingx import (
     Any,
     Dict,
     List,
+    Listx,
     Literal,
     NoneType,
     Optional,
     Set,
     Tuple,
+    Tuplex,
     Type,
     TypedDict,
     Union,
-    XList,
-    XTuple,
     get_args,
     get_origin,
     is_typeddict,
@@ -39,14 +39,14 @@ class FullMovie(TypedDict):
         (FullMovie, ()),
         (Literal["pika"], ("pika",)),
         (Literal["pika", Literal[Literal["bulbi"]]], ("pika", "bulbi")),
-        (XList[str], (str,)),
-        (XList[str, int], (str, int)),
-        (XList[str, int, ...], (str, int, ...)),
-        (XList[str, int, ..., bool], (str, int, ..., bool)),
-        (XTuple[str], (str,)),
-        (XTuple[str, int], (str, int)),
-        (XTuple[str, int, ...], (str, int, ...)),
-        (XTuple[str, int, ..., bool], (str, int, ..., bool)),
+        (Listx[str], (str,)),
+        (Listx[str, int], (str, int)),
+        (Listx[str, int, ...], (str, int, ...)),
+        (Listx[str, int, ..., bool], (str, int, ..., bool)),
+        (Tuplex[str], (str,)),
+        (Tuplex[str, int], (str, int)),
+        (Tuplex[str, int, ...], (str, int, ...)),
+        (Tuplex[str, int, ..., bool], (str, int, ..., bool)),
     ],
 )
 def test_get_args(tp, expected_args):
@@ -68,8 +68,8 @@ def test_get_args(tp, expected_args):
         (FullMovie, None),
         (Literal["pika"], Literal),
         (Literal["pika", Literal[Literal["bulbi"]]], Literal),
-        (XList[str, int, ...], list),
-        (XTuple[str, int, ...], tuple),
+        (Listx[str, int, ...], list),
+        (Tuplex[str, int, ...], tuple),
     ],
 )
 def test_get_origin(tp, expected_origin):

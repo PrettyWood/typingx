@@ -1,38 +1,38 @@
 from typing import Any, Dict, List, Sequence, Set, Union
 
-from .types import XList, XTuple
+from .types import Listx, Tuplex
 from .typing_compat import TypedDict, get_args, get_origin, get_type_hints, is_literal, is_typeddict
 from .utils import TypeLike, lenient_isinstance
 
-__all__ = ("xisinstance",)
+__all__ = ("isinstancex",)
 
 TYPED_DICT_EXTRA_KEY = "__extra__"
 
 
-def xisinstance(obj: Any, tp: Any) -> bool:
+def isinstancex(obj: Any, tp: Any) -> bool:
     """Extend `isinstance` with `typing` types"""
     if tp is Any:
         return True
 
     if lenient_isinstance(tp, tuple):
-        return any(xisinstance(obj, sub_tp) for sub_tp in tp)
+        return any(isinstancex(obj, sub_tp) for sub_tp in tp)
 
     origin = get_origin(tp)
 
     # e.g. Union[str, int]
     if origin is Union:
-        return xisinstance(obj, get_args(tp))
+        return isinstancex(obj, get_args(tp))
 
     # e.g. Dict[str, int]
     if origin is dict:
         if tp is Dict:
             tp = Dict[Any, Any]
         keys_type, values_type = get_args(tp)
-        return all(xisinstance(key, keys_type) for key in obj.keys()) and all(
-            xisinstance(value, values_type) for value in obj.values()
+        return all(isinstancex(key, keys_type) for key in obj.keys()) and all(
+            isinstancex(value, values_type) for value in obj.values()
         )
 
-    # e.g. List[str] or XList[int, str, ...]
+    # e.g. List[str] or Listx[int, str, ...]
     elif origin is list:
         # With recent python versions, `get_args` returns `(~T,)`, which we want to handle easily
         if tp is List:
@@ -46,9 +46,9 @@ def xisinstance(obj: Any, tp: Any) -> bool:
         if tp is Set:
             tp = Set[Any]
 
-        return all(xisinstance(x, get_args(tp)) for x in obj)
+        return all(isinstancex(x, get_args(tp)) for x in obj)
 
-    # e.g. Tuple[int, ...] or XTuple[int, str, ...]
+    # e.g. Tuple[int, ...] or Tuplex[int, str, ...]
     elif origin is tuple:
         return _is_valid_sequence(obj, tp, is_list=False)
 
@@ -68,12 +68,12 @@ def xisinstance(obj: Any, tp: Any) -> bool:
         values_to_check = get_args(obj) if is_literal(obj) else (obj,)
         return all(v in get_args(tp) for v in values_to_check)
 
-    # plain `XList`
-    elif tp is XList:
+    # plain `Listx`
+    elif tp is Listx:
         tp = list
 
-    # plain `XTuple`
-    elif tp is XTuple:
+    # plain `Tuplex`
+    elif tp is Tuplex:
         tp = tuple
 
     return lenient_isinstance(obj, tp)
@@ -96,15 +96,15 @@ def _is_valid_sequence(obj: Sequence[Any], tp: TypeLike, *, is_list: bool) -> bo
         try:
             if expected_types[current_index] is ...:
                 # Check first with previous type...
-                if xisinstance(item, expected_types[current_index - 1]):
+                if isinstancex(item, expected_types[current_index - 1]):
                     continue
 
                 # ...else check with a new type
-                if xisinstance(item, expected_types[current_index + 1]):
+                if isinstancex(item, expected_types[current_index + 1]):
                     current_index += 2
                     continue
             else:
-                if xisinstance(item, expected_types[current_index]):
+                if isinstancex(item, expected_types[current_index]):
                     current_index += 1
                     continue
         except IndexError:
@@ -127,10 +127,10 @@ def _is_valid_typeddict(obj: Dict[str, Any], tp: TypedDict) -> bool:
             return False
 
         are_required_keys_valid = all(
-            xisinstance(v, resolved_annotations[k]) for k, v in obj.items() if k in required_keys
+            isinstancex(v, resolved_annotations[k]) for k, v in obj.items() if k in required_keys
         )
         are_extra_keys_valid = all(
-            xisinstance(v, rest_type) for k, v in obj.items() if k not in required_keys
+            isinstancex(v, rest_type) for k, v in obj.items() if k not in required_keys
         )
         return are_required_keys_valid and are_extra_keys_valid
 
@@ -141,4 +141,4 @@ def _is_valid_typeddict(obj: Dict[str, Any], tp: TypedDict) -> bool:
         ):
             return False
 
-        return all(xisinstance(v, resolved_annotations[k]) for k, v in obj.items())
+        return all(isinstancex(v, resolved_annotations[k]) for k, v in obj.items())

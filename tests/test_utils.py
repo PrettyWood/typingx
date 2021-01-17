@@ -1,5 +1,5 @@
-from typing_extend import TypedDict
-from typing_extend.utils import lenient_isinstance, lenient_issubclass
+from typingx import TypedDict
+from typingx.utils import lenient_isinstance, lenient_issubclass
 
 
 def test_lenient_isinstance():

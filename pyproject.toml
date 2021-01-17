@@ -1,11 +1,11 @@
 [tool.poetry]
-name = "typing-extend"
+name = "typingx"
 version = "0.1.0"
 description = "Extend typing package functionalities"
 authors = ["Eric Jolibois <em.jolibois@gmail.com>"]
 license = "MIT"
-repository = "https://github.com/PrettyWood/typing-extend"
-homepage = "https://github.com/PrettyWood/typing-extend"
+repository = "https://github.com/PrettyWood/typingx"
+homepage = "https://github.com/PrettyWood/typingx"
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
@@ -48,7 +48,7 @@ force_grid_wrap = 0
 use_parentheses = true
 
 [tool.pytest.ini_options]
-addopts = "--cov typing_extend --cov-report=term-missing --cov-report=xml"
+addopts = "--cov typingx --cov-report=term-missing --cov-report=xml"
 testpaths = ["tests"]
 
 [build-system]

@@ -1,8 +1,8 @@
 # flake8: noqa
 from typing import *
 
-from .main import xisinstance
-from .types import XList, XTuple
+from .main import isinstancex
+from .types import Listx, Tuplex
 from .typing_compat import (
     Literal,
     NoneType,
@@ -15,21 +15,21 @@ from .typing_compat import (
 
 __all__ = (
     # main methods
-    "xisinstance",
+    "isinstancex",
     # typing, typing_extensions or own backport
     "Any",
     "Dict",
     "Literal",
     "List",
+    "Listx",
     "Optional",
     "NoneType",
     "Union",
     "Set",
     "Tuple",
+    "Tuplex",
     "Type",
     "TypedDict",
-    "XList",
-    "XTuple",
     "get_args",
     "get_origin",
     "is_literal",

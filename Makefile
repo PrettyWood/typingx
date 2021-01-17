@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := all
-black = black typing_extend tests
-isort = isort typing_extend tests
+black = black typingx tests
+isort = isort typingx tests
 
 .PHONY: install
 install:
@@ -23,10 +23,10 @@ format:
 
 .PHONY: lint
 lint:
-	poetry run flake8 typing_extend tests
+	poetry run flake8 typingx tests
 	poetry run ${black} --diff --check
 	poetry run ${isort} --check-only
-	poetry run mypy typing_extend
+	poetry run mypy typingx
 
 .PHONY: all
 all: lint test

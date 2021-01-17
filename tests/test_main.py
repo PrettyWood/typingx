@@ -1,19 +1,19 @@
 import pytest
 
-from typing_extend import (
+from typingx import (
     Any,
     Dict,
     List,
+    Listx,
     Literal,
     Optional,
     Set,
     Tuple,
+    Tuplex,
     Type,
     TypedDict,
     Union,
-    XList,
-    XTuple,
-    xisinstance,
+    isinstancex,
 )
 
 
@@ -40,9 +40,9 @@ class Bulbi(Pokemon):
         (Bulbi(), Pokemon, True),
     ],
 )
-def test_xisinstance_basic(obj, tp, expected):
+def test_isinstancex_basic(obj, tp, expected):
     """It should work by default like builtin `isinstance`"""
-    assert xisinstance(obj, tp) is expected
+    assert isinstancex(obj, tp) is expected
 
 
 @pytest.mark.parametrize(
@@ -52,9 +52,9 @@ def test_xisinstance_basic(obj, tp, expected):
         ([1, "3"], Any, True),
     ],
 )
-def test_xisinstance_any(obj, tp, expected):
+def test_isinstancex_any(obj, tp, expected):
     """It should support `Any`"""
-    assert xisinstance(obj, tp) is expected
+    assert isinstancex(obj, tp) is expected
 
 
 @pytest.mark.parametrize(
@@ -67,9 +67,9 @@ def test_xisinstance_any(obj, tp, expected):
         ({"a": 1}, Dict[int, Any], False),
     ],
 )
-def test_xisinstance_dict(obj, tp, expected):
+def test_isinstancex_dict(obj, tp, expected):
     """It should support `Dict`"""
-    assert xisinstance(obj, tp) is expected
+    assert isinstancex(obj, tp) is expected
 
 
 @pytest.mark.parametrize(
@@ -85,9 +85,9 @@ def test_xisinstance_dict(obj, tp, expected):
         ([3, 4, 1.1, 2], List[float], False),
     ],
 )
-def test_xisinstance_list(obj, tp, expected):
+def test_isinstancex_list(obj, tp, expected):
     """It should support `List`"""
-    assert xisinstance(obj, tp) is expected
+    assert isinstancex(obj, tp) is expected
 
 
 @pytest.mark.parametrize(
@@ -101,9 +101,9 @@ def test_xisinstance_list(obj, tp, expected):
         ({"a", 1}, Set[Union[str, int]], True),
     ],
 )
-def test_xisinstance_set(obj, tp, expected):
+def test_isinstancex_set(obj, tp, expected):
     """It should support `Set`"""
-    assert xisinstance(obj, tp) is expected
+    assert isinstancex(obj, tp) is expected
 
 
 @pytest.mark.parametrize(
@@ -119,57 +119,57 @@ def test_xisinstance_set(obj, tp, expected):
         ((3,), Tuple[int, str], False),
     ],
 )
-def test_xisinstance_tuple(obj, tp, expected):
+def test_isinstancex_tuple(obj, tp, expected):
     """It should support `Tuple`"""
-    assert xisinstance(obj, tp) is expected
+    assert isinstancex(obj, tp) is expected
 
 
 @pytest.mark.parametrize(
     "obj,tp,expected",
     [
-        ([3], XList, True),
-        ([3], XList[Any], True),
-        ([3], XList[int], True),
-        ([3, 4, 5], XList[int], True),
-        ([3, "pika"], XList[int, int], False),
-        ([3], XList[str], False),
-        ([3, "pika"], XList[int, str, ...], True),
-        ([1, 2, "q", "w", "e"], XList[int, ..., str], False),
-        ([1, 2, "q", "w", "e"], XList[int, ..., str, ...], True),
-        ([3, "pika", "bulbi"], XList[int, str, ...], True),
-        ([3, "pika", "bulbi", "cara"], XList[int, str, ...], True),
-        ([3, "pika", "bulbi", "cara"], XList[int, str, ..., bool], False),
-        ([3, "pika", "bulbi", "cara", True], XList[int, str, ..., bool], True),
-        ([3, "pika", "bulbi", "cara", 3], XList[int, str, ..., bool], False),
-        ([3, "pika", "bulbi", "cara", True, False], XList[int, str, ..., bool, ...], True),
+        ([3], Listx, True),
+        ([3], Listx[Any], True),
+        ([3], Listx[int], True),
+        ([3, 4, 5], Listx[int], True),
+        ([3, "pika"], Listx[int, int], False),
+        ([3], Listx[str], False),
+        ([3, "pika"], Listx[int, str, ...], True),
+        ([1, 2, "q", "w", "e"], Listx[int, ..., str], False),
+        ([1, 2, "q", "w", "e"], Listx[int, ..., str, ...], True),
+        ([3, "pika", "bulbi"], Listx[int, str, ...], True),
+        ([3, "pika", "bulbi", "cara"], Listx[int, str, ...], True),
+        ([3, "pika", "bulbi", "cara"], Listx[int, str, ..., bool], False),
+        ([3, "pika", "bulbi", "cara", True], Listx[int, str, ..., bool], True),
+        ([3, "pika", "bulbi", "cara", 3], Listx[int, str, ..., bool], False),
+        ([3, "pika", "bulbi", "cara", True, False], Listx[int, str, ..., bool, ...], True),
     ],
 )
-def test_xisinstance_xlist(obj, tp, expected):
-    """It should support `XList`"""
-    assert xisinstance(obj, tp) is expected
+def test_isinstancex_xlist(obj, tp, expected):
+    """It should support `Listx`"""
+    assert isinstancex(obj, tp) is expected
 
 
 @pytest.mark.parametrize(
     "obj,tp,expected",
     [
-        ((3,), XTuple, True),
-        ((3,), XTuple[Any], True),
-        ((3,), XTuple[int], True),
-        ((3,), XTuple[int, ...], True),
-        ((3,), XTuple[int, int], False),
-        ((3,), XTuple[str], False),
-        ((3, "pika"), XTuple[int, str, ...], True),
-        ((3, "pika", "bulbi"), XTuple[int, str, ...], True),
-        ((3, "pika", "bulbi", "cara"), XTuple[int, str, ...], True),
-        ((3, "pika", "bulbi", "cara"), XTuple[int, str, ..., bool], False),
-        ((3, "pika", "bulbi", "cara", True), XTuple[int, str, ..., bool], True),
-        ((3, "pika", "bulbi", "cara", 3), XTuple[int, str, ..., bool], False),
-        ((3, "pika", "bulbi", "cara", True, False), XTuple[int, str, ..., bool, ...], True),
+        ((3,), Tuplex, True),
+        ((3,), Tuplex[Any], True),
+        ((3,), Tuplex[int], True),
+        ((3,), Tuplex[int, ...], True),
+        ((3,), Tuplex[int, int], False),
+        ((3,), Tuplex[str], False),
+        ((3, "pika"), Tuplex[int, str, ...], True),
+        ((3, "pika", "bulbi"), Tuplex[int, str, ...], True),
+        ((3, "pika", "bulbi", "cara"), Tuplex[int, str, ...], True),
+        ((3, "pika", "bulbi", "cara"), Tuplex[int, str, ..., bool], False),
+        ((3, "pika", "bulbi", "cara", True), Tuplex[int, str, ..., bool], True),
+        ((3, "pika", "bulbi", "cara", 3), Tuplex[int, str, ..., bool], False),
+        ((3, "pika", "bulbi", "cara", True, False), Tuplex[int, str, ..., bool, ...], True),
     ],
 )
-def test_xisinstance_xtuple(obj, tp, expected):
-    """It should support `XTuple`"""
-    assert xisinstance(obj, tp) is expected
+def test_isinstancex_xtuple(obj, tp, expected):
+    """It should support `Tuplex`"""
+    assert isinstancex(obj, tp) is expected
 
 
 @pytest.mark.parametrize(
@@ -181,9 +181,9 @@ def test_xisinstance_xtuple(obj, tp, expected):
         (3, Union[int, str], True),
     ],
 )
-def test_xisinstance_union(obj, tp, expected):
+def test_isinstancex_union(obj, tp, expected):
     """It should support `Union` (and `Optional`)"""
-    assert xisinstance(obj, tp) is expected
+    assert isinstancex(obj, tp) is expected
 
 
 @pytest.mark.parametrize(
@@ -197,9 +197,9 @@ def test_xisinstance_union(obj, tp, expected):
         (Bulbi, Type[Pokemon], True),
     ],
 )
-def test_xisinstance_type(obj, tp, expected):
+def test_isinstancex_type(obj, tp, expected):
     """It should support `Type`"""
-    assert xisinstance(obj, tp) is expected
+    assert isinstancex(obj, tp) is expected
 
 
 class FullMovie(TypedDict, total=True):
@@ -236,9 +236,9 @@ class StrExtra(TypedDict):
         ({"a": 1, "b": 0.1, "c": "pika", "d": 1}, StrExtra, False),
     ],
 )
-def test_xisinstance_typeddict(obj, tp, expected):
+def test_isinstancex_typeddict(obj, tp, expected):
     """It should support `TypeDict`"""
-    assert xisinstance(obj, tp) is expected
+    assert isinstancex(obj, tp) is expected
 
 
 @pytest.mark.parametrize(
@@ -253,9 +253,9 @@ def test_xisinstance_typeddict(obj, tp, expected):
         (Literal["pika", "bulbi"], Literal["bulbi", "pika", "cara"], True),
     ],
 )
-def test_xisinstance_literal(obj, tp, expected):
+def test_isinstancex_literal(obj, tp, expected):
     """It should support `Literal`"""
-    assert xisinstance(obj, tp) is expected
+    assert isinstancex(obj, tp) is expected
 
 
 Number = Union[int, float]
@@ -270,6 +270,6 @@ Number = Union[int, float]
         ([[3, 4, "q"], ["q", "w"]], List[Union[List[int], List[str]]], False),
     ],
 )
-def test_xisinstance_mix(obj, tp, expected):
+def test_isinstancex_mix(obj, tp, expected):
     """It should support a mix of all those types"""
-    assert xisinstance(obj, tp) is expected
+    assert isinstancex(obj, tp) is expected
