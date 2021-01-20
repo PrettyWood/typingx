@@ -21,6 +21,7 @@ from typingx import (
     Union,
     get_args,
     get_origin,
+    is_literal,
     is_newtype,
     is_typeddict,
 )
@@ -84,6 +85,11 @@ def test_get_args(tp, expected_args):
 )
 def test_get_origin(tp, expected_origin):
     assert get_origin(tp) == expected_origin
+
+
+def test_is_literal():
+    assert is_literal(Literal["pika"]) is True
+    assert is_literal(int) is False
 
 
 def test_is_typeddict():
