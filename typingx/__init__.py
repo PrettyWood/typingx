@@ -10,6 +10,7 @@ from .typing_compat import (
     get_args,
     get_origin,
     is_literal,
+    is_newtype,
     is_typeddict,
 )
 
@@ -24,6 +25,7 @@ __all__ = (
     "Listx",
     "Mapping",
     "Optional",
+    "NewType",
     "NoneType",
     "Union",
     "Set",
@@ -35,5 +37,6 @@ __all__ = (
     "get_args",
     "get_origin",
     "is_literal",
+    "is_newtype",
     "is_typeddict",
 )

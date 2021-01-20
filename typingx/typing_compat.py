@@ -15,6 +15,7 @@ __all__ = (
     "get_origin",
     "get_type_hints",
     "is_literal",
+    "is_newtype",
     "is_typeddict",
 )
 
@@ -185,3 +186,16 @@ def _get_all_literal_values(tp: TypeLike) -> T.Tuple[T.Any, ...]:
 
     literal_values = _get_literal_values(tp)
     return tuple(x for v in literal_values for x in _get_all_literal_values(v))
+
+
+#######################################
+# NewType
+#######################################
+TestType = T.NewType("TestType", str)
+
+
+def is_newtype(tp: TypeLike) -> bool:
+    """
+    Check if a type is a `NewType`
+    """
+    return tp.__class__ is TestType.__class__

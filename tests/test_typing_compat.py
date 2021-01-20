@@ -9,6 +9,7 @@ from typingx import (
     Listx,
     Literal,
     Mapping,
+    NewType,
     NoneType,
     Optional,
     Sequence,
@@ -20,6 +21,7 @@ from typingx import (
     Union,
     get_args,
     get_origin,
+    is_newtype,
     is_typeddict,
 )
 
@@ -87,3 +89,9 @@ def test_get_origin(tp, expected_origin):
 def test_is_typeddict():
     assert is_typeddict(FullMovie) is True
     assert is_typeddict(dict) is False
+
+
+def test_is_newtype():
+    UserId = NewType("UserId", int)
+    assert is_newtype(UserId) is True
+    assert is_newtype(int) is False

@@ -9,6 +9,7 @@ from typingx import (
     Listx,
     Literal,
     Mapping,
+    NewType,
     NoneType,
     Optional,
     Sequence,
@@ -314,6 +315,14 @@ def test_isinstancex_none(obj, tp, expected):
 def test_isinstancex_mapping(obj, tp, expected):
     """It should support `Mapping`"""
     assert isinstancex(obj, tp) is expected
+
+
+def test_isinstancex_newtype():
+    """It should support `NewType`"""
+    UserId = NewType("UserId", int)
+    assert isinstancex(1, UserId) is True
+    assert isinstancex(UserId(1), UserId) is True
+    assert isinstancex("3", UserId) is False
 
 
 Number = Union[int, float]

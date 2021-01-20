@@ -12,7 +12,7 @@ and go even further with `typing` (and `typing_extensions`).
 
 It provides:
 - `get_args` and `get_origin` for python `3.6` to `3.9` that mimic `3.10` behaviour
-- `is_literal`, `is_typeddict` helpers
+- `is_literal`, `is_newtype`, `is_typeddict` helpers
 - most `typing` types but with homogeneous behaviour
   (e.g. with `3.8`, `typing.TypedDict` won't store information to distinguish optional and required keys. This lib will hence choose `typing_extensions` version)
 
@@ -80,6 +80,13 @@ assert isinstancex(Literal["a", "b"], Literal["b", "a", "c"]) is True
 # Mapping
 assert isinstancex(Counter({"red": 4, "blue": 2}), Mapping[str, int]) is True
 assert isinstancex(ChainMap({"art": "van gogh"}, {"music": "bach"}), Mapping[str, str]) is True
+
+# NewType
+UserId = NewType("UserId", int)
+
+assert isinstancex(1, UserId) is True
+assert isinstancex(UserId(1), UserId) is True
+assert isinstancex("3", UserId) is False
 
 # None
 assert isinstancex([None, None], list[None]) is True

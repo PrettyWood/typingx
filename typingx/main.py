@@ -10,6 +10,7 @@ from .typing_compat import (
     get_origin,
     get_type_hints,
     is_literal,
+    is_newtype,
     is_typeddict,
 )
 from .utils import OneOrManyTypes, TypeLike, lenient_isinstance, lenient_issubclass
@@ -31,6 +32,9 @@ def _isinstancex(obj: Any, tp: Any) -> bool:
     """Extend `isinstance` with `typing` types"""
     if tp is Any:
         return True
+
+    if is_newtype(tp):
+        tp = tp.__supertype__
 
     # https://www.python.org/dev/peps/pep-0484/#using-none
     if obj is None and tp in NONE_TYPES:
