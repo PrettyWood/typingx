@@ -33,7 +33,7 @@ def _isinstancex(obj: Any, tp: Any) -> bool:
     if tp is Any:
         return True
 
-    if is_newtype(tp):
+    while is_newtype(tp):
         tp = tp.__supertype__
 
     # https://www.python.org/dev/peps/pep-0484/#using-none

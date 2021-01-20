@@ -40,6 +40,7 @@ from typingx import (
     Listx,
     Literal,
     Mapping,
+    NewType,
     NoneType,
     Sequence,
     Set,
@@ -83,8 +84,10 @@ assert isinstancex(ChainMap({"art": "van gogh"}, {"music": "bach"}), Mapping[str
 
 # NewType
 UserId = NewType("UserId", int)
+ProUserId = NewType("ProUserId", UserId)
 
 assert isinstancex(1, UserId) is True
+assert isinstancex(1, ProUserId) is True
 assert isinstancex(UserId(1), UserId) is True
 assert isinstancex("3", UserId) is False
 

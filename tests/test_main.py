@@ -320,7 +320,9 @@ def test_isinstancex_mapping(obj, tp, expected):
 def test_isinstancex_newtype():
     """It should support `NewType`"""
     UserId = NewType("UserId", int)
+    ProUserId = NewType("ProUserId", UserId)
     assert isinstancex(1, UserId) is True
+    assert isinstancex(1, ProUserId) is True
     assert isinstancex(UserId(1), UserId) is True
     assert isinstancex("3", UserId) is False
 
