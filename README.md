@@ -31,12 +31,16 @@ but also:
 
 ## Usage
 ```python
+from collections import ChainMap, Counter
+
 from typingx import (
     Any,
     Dict,
     List,
     Listx,
     Literal,
+    Mapping,
+    Sequence,
     Set,
     Tuple,
     Tuplex,
@@ -71,6 +75,15 @@ assert isinstancex(Literal["a"], Literal["a"]) is True
 assert isinstancex("b", Literal["a"]) is False
 assert isinstancex("b", Literal["a", Literal[Literal["b"]]]) is True
 assert isinstancex(Literal["a", "b"], Literal["b", "a", "c"]) is True
+
+# Mapping
+assert isinstancex(Counter({"red": 4, "blue": 2}), Mapping[str, int]) is True
+assert isinstancex(ChainMap({"art": "van gogh"}, {"music": "bach"}), Mapping[str, str]) is True
+
+# Sequence
+assert isinstancex("abc", Sequence[Any]) is True
+assert isinstancex("abc", Sequence[int]) is False
+assert isinstancex((1, 3, 5), Sequence[int]) is True
 
 # Set
 assert isinstancex({"a", "b"}, Set[str]) is True
