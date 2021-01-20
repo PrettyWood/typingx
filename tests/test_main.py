@@ -65,6 +65,7 @@ def test_isinstancex_any(obj, tp, expected):
         ({"a": 1}, Dict[Any, Any], True),
         ({"a": 1}, Dict[str, Any], True),
         ({"a": 1}, Dict[int, Any], False),
+        (["a", "b"], Dict[str, str], False),
     ],
 )
 def test_isinstancex_dict(obj, tp, expected):
@@ -83,6 +84,7 @@ def test_isinstancex_dict(obj, tp, expected):
         (["3"], List[int], False),
         ([3, 4, "1", 2], List[int], False),
         ([3, 4, 1.1, 2], List[float], False),
+        ((3, 4), List[int], False),
     ],
 )
 def test_isinstancex_list(obj, tp, expected):
@@ -99,6 +101,7 @@ def test_isinstancex_list(obj, tp, expected):
         ({"a"}, Set[str], True),
         ({"a", 1}, Set[str], False),
         ({"a", 1}, Set[Union[str, int]], True),
+        (("a", "b"), Set[int], False),
     ],
 )
 def test_isinstancex_set(obj, tp, expected):
@@ -195,6 +198,7 @@ def test_isinstancex_union(obj, tp, expected):
         (Pika, Type[Pokemon], True),
         (Bulbi, Type[Pika], False),
         (Bulbi, Type[Pokemon], True),
+        (3, Type[int], False),
     ],
 )
 def test_isinstancex_type(obj, tp, expected):

@@ -2,7 +2,7 @@ from typing import Any, Dict, List, Sequence, Set, Union
 
 from .types import Listx, Tuplex
 from .typing_compat import TypedDict, get_args, get_origin, get_type_hints, is_literal, is_typeddict
-from .utils import TypeLike, lenient_isinstance
+from .utils import TypeLike, lenient_isinstance, lenient_issubclass
 
 __all__ = ("isinstancex",)
 
@@ -28,8 +28,10 @@ def isinstancex(obj: Any, tp: Any) -> bool:
         if tp is Dict:
             tp = Dict[Any, Any]
         keys_type, values_type = get_args(tp)
-        return all(isinstancex(key, keys_type) for key in obj.keys()) and all(
-            isinstancex(value, values_type) for value in obj.values()
+        return (
+            isinstancex(obj, dict)
+            and all(isinstancex(key, keys_type) for key in obj.keys())
+            and all(isinstancex(value, values_type) for value in obj.values())
         )
 
     # e.g. List[str] or Listx[int, str, ...]
@@ -38,7 +40,7 @@ def isinstancex(obj: Any, tp: Any) -> bool:
         if tp is List:
             tp = List[Any]
 
-        return _is_valid_sequence(obj, tp, is_list=True)
+        return isinstancex(obj, list) and _is_valid_sequence(obj, tp, is_list=True)
 
     # e.g. Set[str]
     elif origin is set:
@@ -46,7 +48,7 @@ def isinstancex(obj: Any, tp: Any) -> bool:
         if tp is Set:
             tp = Set[Any]
 
-        return all(isinstancex(x, get_args(tp)) for x in obj)
+        return isinstancex(obj, set) and all(isinstancex(x, get_args(tp)) for x in obj)
 
     # e.g. Tuple[int, ...] or Tuplex[int, str, ...]
     elif origin is tuple:
@@ -54,7 +56,7 @@ def isinstancex(obj: Any, tp: Any) -> bool:
 
     # e.g. Type[int]
     elif origin is type:
-        return issubclass(obj, get_args(tp))
+        return lenient_issubclass(obj, get_args(tp))
 
     # e.g. TypedDict('Movie', {'name': str, 'year': int})
     elif is_typeddict(tp):
