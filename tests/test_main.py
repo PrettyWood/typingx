@@ -1,3 +1,5 @@
+from collections import ChainMap, Counter
+
 import pytest
 
 from typingx import (
@@ -6,7 +8,9 @@ from typingx import (
     List,
     Listx,
     Literal,
+    Mapping,
     Optional,
+    Sequence,
     Set,
     Tuple,
     Tuplex,
@@ -259,6 +263,40 @@ def test_isinstancex_typeddict(obj, tp, expected):
 )
 def test_isinstancex_literal(obj, tp, expected):
     """It should support `Literal`"""
+    assert isinstancex(obj, tp) is expected
+
+
+@pytest.mark.parametrize(
+    "obj,tp,expected",
+    [
+        ("pika", Sequence[str], True),
+        (["pika", "chu"], Sequence[str], True),
+        (("pika", "chu"), Sequence[str], True),
+        (("pika", "chu"), Sequence[int], False),
+    ],
+)
+def test_isinstancex_sequence(obj, tp, expected):
+    """It should support `Sequence`"""
+    assert isinstancex(obj, tp) is expected
+
+
+@pytest.mark.parametrize(
+    "obj,tp,expected",
+    [
+        ("pika", Mapping[str, int], False),
+        ({"pika": "chu"}, Mapping[str, str], True),
+        ({"pika": "chu"}, Mapping[str, int], False),
+        (Counter({"red": 4, "blue": 2}), Mapping[str, int], True),
+        (Counter({"red": 4, "blue": 2}), Mapping[int, int], False),
+        (
+            ChainMap({"art": "van gogh", "opera": "carmen"}, {"music": "bach", "art": "rembrandt"}),
+            Mapping[str, str],
+            True,
+        ),
+    ],
+)
+def test_isinstancex_mapping(obj, tp, expected):
+    """It should support `Mapping`"""
     assert isinstancex(obj, tp) is expected
 
 

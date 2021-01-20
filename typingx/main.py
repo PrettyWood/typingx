@@ -1,4 +1,5 @@
-from typing import Any, Dict, List, Sequence, Set, Union
+import collections.abc
+from typing import Any, Dict, List, Mapping, Sequence, Set, Union
 
 from .types import Listx, Tuplex
 from .typing_compat import TypedDict, get_args, get_origin, get_type_hints, is_literal, is_typeddict
@@ -27,12 +28,7 @@ def isinstancex(obj: Any, tp: Any) -> bool:
     if origin is dict:
         if tp is Dict:
             tp = Dict[Any, Any]
-        keys_type, values_type = get_args(tp)
-        return (
-            isinstancex(obj, dict)
-            and all(isinstancex(key, keys_type) for key in obj.keys())
-            and all(isinstancex(value, values_type) for value in obj.values())
-        )
+        return isinstancex(obj, dict) and _is_valid_mapping(obj, tp)
 
     # e.g. List[str] or Listx[int, str, ...]
     elif origin is list:
@@ -69,6 +65,14 @@ def isinstancex(obj: Any, tp: Any) -> bool:
     elif is_literal(tp):
         values_to_check = get_args(obj) if is_literal(obj) else (obj,)
         return all(v in get_args(tp) for v in values_to_check)
+
+    # e.g. Sequence[int]
+    elif origin is collections.abc.Sequence:
+        return _is_valid_sequence(obj, tp, is_list=True)
+
+    # e.g. Maping[str, int]
+    elif origin is collections.abc.Mapping:
+        return _is_valid_mapping(obj, tp)
 
     # plain `Listx`
     elif tp is Listx:
@@ -116,6 +120,16 @@ def _is_valid_sequence(obj: Sequence[Any], tp: TypeLike, *, is_list: bool) -> bo
     else:
         # Check remaining types
         return expected_types[current_index:] in ((), (...,))
+
+
+def _is_valid_mapping(obj: Mapping[Any, Any], tp: TypeLike) -> bool:
+    keys_type, values_type = get_args(tp)
+    try:
+        return all(isinstancex(key, keys_type) for key in obj.keys()) and all(
+            isinstancex(value, values_type) for value in obj.values()
+        )
+    except AttributeError:
+        return False
 
 
 def _is_valid_typeddict(obj: Dict[str, Any], tp: TypedDict) -> bool:
