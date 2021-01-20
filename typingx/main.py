@@ -2,12 +2,22 @@ import collections.abc
 from typing import Any, Dict, List, Set, Union
 
 from .types import Listx, Tuplex
-from .typing_compat import TypedDict, get_args, get_origin, get_type_hints, is_literal, is_typeddict
+from .typing_compat import (
+    Literal,
+    NoneType,
+    TypedDict,
+    get_args,
+    get_origin,
+    get_type_hints,
+    is_literal,
+    is_typeddict,
+)
 from .utils import OneOrManyTypes, TypeLike, lenient_isinstance, lenient_issubclass
 
 __all__ = ("isinstancex",)
 
 TYPED_DICT_EXTRA_KEY = "__extra__"
+NONE_TYPES = (None, NoneType, Literal[None])
 
 
 def isinstancex(obj: Any, tp: OneOrManyTypes) -> bool:
@@ -20,6 +30,10 @@ def isinstancex(obj: Any, tp: OneOrManyTypes) -> bool:
 def _isinstancex(obj: Any, tp: Any) -> bool:
     """Extend `isinstance` with `typing` types"""
     if tp is Any:
+        return True
+
+    # https://www.python.org/dev/peps/pep-0484/#using-none
+    if obj is None and tp in NONE_TYPES:
         return True
 
     if lenient_isinstance(tp, tuple):

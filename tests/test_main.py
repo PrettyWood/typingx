@@ -9,6 +9,7 @@ from typingx import (
     Listx,
     Literal,
     Mapping,
+    NoneType,
     Optional,
     Sequence,
     Set,
@@ -279,6 +280,19 @@ def test_isinstancex_literal(obj, tp, expected):
 )
 def test_isinstancex_sequence(obj, tp, expected):
     """It should support `Sequence`"""
+    assert isinstancex(obj, tp) is expected
+
+
+@pytest.mark.parametrize(
+    "obj,tp,expected",
+    [
+        ([None, None], List[None], True),
+        ([None, None], List[NoneType], True),
+        ([None, None], List[Literal[None]], True),
+    ],
+)
+def test_isinstancex_none(obj, tp, expected):
+    """It should support `None` types"""
     assert isinstancex(obj, tp) is expected
 
 

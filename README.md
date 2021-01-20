@@ -40,6 +40,7 @@ from typingx import (
     Listx,
     Literal,
     Mapping,
+    NoneType,
     Sequence,
     Set,
     Tuple,
@@ -79,6 +80,12 @@ assert isinstancex(Literal["a", "b"], Literal["b", "a", "c"]) is True
 # Mapping
 assert isinstancex(Counter({"red": 4, "blue": 2}), Mapping[str, int]) is True
 assert isinstancex(ChainMap({"art": "van gogh"}, {"music": "bach"}), Mapping[str, str]) is True
+
+# None
+assert isinstancex([None, None], list[None]) is True
+assert isinstancex([None, None], list[NoneType]) is True
+assert isinstancex([None, None], list[type(None)]) is True
+assert isinstancex([None, None], list[Literal[None]]) is True
 
 # Sequence
 assert isinstancex("abc", Sequence[Any]) is True
