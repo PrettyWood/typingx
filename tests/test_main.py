@@ -124,6 +124,7 @@ def test_isinstancex_set(obj, tp, expected):
         ((3,), Tuple[int, int], False),
         ((3,), Tuple[str], False),
         ((3,), Tuple[int, str], False),
+        ([3], Tuple[int], False),
     ],
 )
 def test_isinstancex_tuple(obj, tp, expected):
@@ -269,6 +270,7 @@ def test_isinstancex_literal(obj, tp, expected):
 @pytest.mark.parametrize(
     "obj,tp,expected",
     [
+        (1, Sequence[str], False),
         ("pika", Sequence[str], True),
         (["pika", "chu"], Sequence[str], True),
         (("pika", "chu"), Sequence[str], True),

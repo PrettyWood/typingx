@@ -1,16 +1,23 @@
 import collections.abc
-from typing import Any, Dict, List, Mapping, Sequence, Set, Union
+from typing import Any, Dict, List, Set, Union
 
 from .types import Listx, Tuplex
 from .typing_compat import TypedDict, get_args, get_origin, get_type_hints, is_literal, is_typeddict
-from .utils import TypeLike, lenient_isinstance, lenient_issubclass
+from .utils import OneOrManyTypes, TypeLike, lenient_isinstance, lenient_issubclass
 
 __all__ = ("isinstancex",)
 
 TYPED_DICT_EXTRA_KEY = "__extra__"
 
 
-def isinstancex(obj: Any, tp: Any) -> bool:
+def isinstancex(obj: Any, tp: OneOrManyTypes) -> bool:
+    try:
+        return _isinstancex(obj, tp)
+    except (AttributeError, TypeError):
+        return False
+
+
+def _isinstancex(obj: Any, tp: Any) -> bool:
     """Extend `isinstance` with `typing` types"""
     if tp is Any:
         return True
@@ -48,7 +55,7 @@ def isinstancex(obj: Any, tp: Any) -> bool:
 
     # e.g. Tuple[int, ...] or Tuplex[int, str, ...]
     elif origin is tuple:
-        return _is_valid_sequence(obj, tp, is_list=False)
+        return isinstance(obj, tuple) and _is_valid_sequence(obj, tp, is_list=False)
 
     # e.g. Type[int]
     elif origin is type:
@@ -85,7 +92,7 @@ def isinstancex(obj: Any, tp: Any) -> bool:
     return lenient_isinstance(obj, tp)
 
 
-def _is_valid_sequence(obj: Sequence[Any], tp: TypeLike, *, is_list: bool) -> bool:
+def _is_valid_sequence(obj: Any, tp: TypeLike, *, is_list: bool) -> bool:
     """
     Check that a sequence respects a type with args like [str], [str, int], [str, ...]
     but also args like [str, int, ...] or even [str, int, ..., bool, ..., float]
@@ -122,14 +129,11 @@ def _is_valid_sequence(obj: Sequence[Any], tp: TypeLike, *, is_list: bool) -> bo
         return expected_types[current_index:] in ((), (...,))
 
 
-def _is_valid_mapping(obj: Mapping[Any, Any], tp: TypeLike) -> bool:
+def _is_valid_mapping(obj: Any, tp: TypeLike) -> bool:
     keys_type, values_type = get_args(tp)
-    try:
-        return all(isinstancex(key, keys_type) for key in obj.keys()) and all(
-            isinstancex(value, values_type) for value in obj.values()
-        )
-    except AttributeError:
-        return False
+    return all(isinstancex(key, keys_type) for key in obj.keys()) and all(
+        isinstancex(value, values_type) for value in obj.values()
+    )
 
 
 def _is_valid_typeddict(obj: Dict[str, Any], tp: TypedDict) -> bool:
