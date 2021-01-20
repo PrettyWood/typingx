@@ -6,6 +6,7 @@ authors = ["Eric Jolibois <em.jolibois@gmail.com>"]
 license = "MIT"
 repository = "https://github.com/PrettyWood/typingx"
 homepage = "https://github.com/PrettyWood/typingx"
+readme = "README.md"
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
