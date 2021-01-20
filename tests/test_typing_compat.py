@@ -1,3 +1,5 @@
+import collections
+
 import pytest
 
 from typingx import (
@@ -6,8 +8,10 @@ from typingx import (
     List,
     Listx,
     Literal,
+    Mapping,
     NoneType,
     Optional,
+    Sequence,
     Set,
     Tuple,
     Tuplex,
@@ -47,6 +51,8 @@ class FullMovie(TypedDict):
         (Tuplex[str, int], (str, int)),
         (Tuplex[str, int, ...], (str, int, ...)),
         (Tuplex[str, int, ..., bool], (str, int, ..., bool)),
+        (Sequence[int], (int,)),
+        (Mapping[str, int], (str, int)),
     ],
 )
 def test_get_args(tp, expected_args):
@@ -70,6 +76,8 @@ def test_get_args(tp, expected_args):
         (Literal["pika", Literal[Literal["bulbi"]]], Literal),
         (Listx[str, int, ...], list),
         (Tuplex[str, int, ...], tuple),
+        (Sequence[int], collections.abc.Sequence),
+        (Mapping[str, int], collections.abc.Mapping),
     ],
 )
 def test_get_origin(tp, expected_origin):

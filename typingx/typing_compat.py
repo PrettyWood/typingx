@@ -58,6 +58,7 @@ elif sys.version_info[:2] == (3, 7):
 
 
 else:
+    import collections.abc
 
     def T_get_origin(tp: TypeLike) -> T.Optional[TypeLike]:
         # In python 3.6, the origin of `List[str]` for example
@@ -65,7 +66,9 @@ else:
         typing_to_builtin_map = {
             T.Dict: dict,
             T.List: list,
+            T.Mapping: collections.abc.Mapping,
             T.Set: set,
+            T.Sequence: collections.abc.Sequence,
             T.Tuple: tuple,
             T.Type: type,
         }
