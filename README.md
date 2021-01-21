@@ -5,23 +5,26 @@
 [![versions](https://img.shields.io/pypi/pyversions/typingx.svg)](https://github.com/PrettyWood/typingx)
 [![license](https://img.shields.io/github/license/PrettyWood/typingx.svg)](https://github.com/PrettyWood/typingx/blob/master/LICENSE)
 
-`typing` is great but it changed a lot since 3.6 and it's not over!
 
-This library purpose is to have a consistent behaviour for all those versions to mimic the most recent one
-and go even further with `typing` (and `typing_extensions`).
+How many times have you wanted to answer one of those questions in application code or while writing tests?
+- Is `x` a valid list of only `int` values
+- Is `x` a dictionary with only `'a'` and `'b'` keys
+- ...
 
-It provides:
-- `get_args` and `get_origin` for python `3.6` to `3.9` that mimic `3.10` behaviour
+This library purpose is to leverage `typing` (and `typing_extensions` for python 3.8-) types at runtime
+to do some validations on a type or an object.
+Since `typing` changed a lot since python `3.6`, this library also makes sure the whole behaviour
+is consistent with the latest python version `3.10`.
+
+It hence provides:
+- `isinstancex` and `issubclassx`: like `isinstance` and `issubclass` but with `typing` types and extra types provided by this library
+- `get_args` and `get_origin` that have the exact same behaviour as the `3.10` python version ones, no matter which python version is used (the only exception being `get_args` with `Generic` on python 3.6)
 - `is_literal`, `is_newtype`, `is_typeddict` helpers
-- most `typing` types but with homogeneous behaviour
-  (e.g. with `3.8`, `typing.TypedDict` won't store information to distinguish optional and required keys. This lib will hence choose `typing_extensions` version)
-
-but also:
-- `isinstancex`: like `isinstance` but with `typing(x)` types
-- extra types:
-  * `Listx` and `Tuplex`: more sophisticated versions of `List` and `Tuple` to add `...` anywhere in the parameters
+- most `typing` types but with homogeneous behaviour (e.g. with `3.8`, this libray will choose `typing_extensions.TypedDict` instead of `typing.TypedDict` since the latter doesn't store information to distinguish optional and required keys)
 - extanded types:
   * `TypedDict` has a `__extra__` field (value can be changed) to allow type checking on optional fields
+- extra types:
+  * `Listx` and `Tuplex`: more sophisticated versions of `List` and `Tuple` to add `...` anywhere in the parameters
 
 ## Installation
 
@@ -33,30 +36,15 @@ but also:
 ```python
 from collections import ChainMap, Counter
 
-from typingx import (
-    Any,
-    Dict,
-    List,
-    Listx,
-    Literal,
-    Mapping,
-    NewType,
-    NoneType,
-    Sequence,
-    Set,
-    Tuple,
-    Tuplex,
-    Type,
-    TypedDict,
-    Union,
-    isinstancex,
-)
+from typingx import *
 
 # Dict
 assert isinstancex({"a": 1, "b": 2}, Dict[str, int]) is True
 assert isinstancex({"a": 1, "b": 2}, Dict[str, str]) is False
 assert isinstancex({"a": 1, "b": 2}, Dict[int, str]) is False
 assert isinstancex({"a": 1, "b": 2}, Dict[str, Any]) is True
+# Can be written with the shortcut!
+assert isinstancex({"a": 1, "b": 2}, {str: int}) is True
 
 # List
 assert isinstancex([1, 2, 3], List[int]) is True
@@ -70,6 +58,8 @@ assert isinstancex([1, 2, "q", "w", "e"], Listx[int, ..., str]) is False
 assert isinstancex([1, 2, "q", "w", "e"], Listx[int, ..., str, ...]) is True
 assert isinstancex([1, 2, "q", "w", b"xyz", "e"], Listx[int, ..., str, ...]) is False
 assert isinstancex([1, 2, "q", "w", b"xyz", "e"], Listx[int, ..., Union[str, bytes], ...]) is True
+# Can be written with the shortcut!
+assert isinstancex([1, 2, 3, 4], [int]) is True
 
 # Literal
 assert isinstancex("a", Literal["a"]) is True
@@ -92,10 +82,10 @@ assert isinstancex(UserId(1), UserId) is True
 assert isinstancex("3", UserId) is False
 
 # None
-assert isinstancex([None, None], list[None]) is True
-assert isinstancex([None, None], list[NoneType]) is True
-assert isinstancex([None, None], list[type(None)]) is True
-assert isinstancex([None, None], list[Literal[None]]) is True
+assert isinstancex([None, None], List[None]) is True
+assert isinstancex([None, None], List[NoneType]) is True
+assert isinstancex([None, None], List[type(None)]) is True
+assert isinstancex([None, None], List[Literal[None]]) is True
 
 # Sequence
 assert isinstancex("abc", Sequence[Any]) is True
@@ -105,6 +95,8 @@ assert isinstancex((1, 3, 5), Sequence[int]) is True
 # Set
 assert isinstancex({"a", "b"}, Set[str]) is True
 assert isinstancex({"a", "b"}, Set[int]) is False
+# Can be written with the shortcut!
+assert isinstancex({"a", "b"}, {str}) is True
 
 # Tuple
 assert isinstancex((1, 2), Tuple[int, ...]) is True
@@ -118,6 +110,8 @@ assert isinstancex((3, "a", "b", "c"), Tuplex[int, str, ..., bool]) is False
 assert isinstancex((3, "a", "b", "c", True), Tuplex[int, str, ..., bool]) is True
 assert isinstancex((3, "a", "b", "c", 3), Tuplex[int, str, ..., bool]) is False
 assert isinstancex((3, "a", "b", "c", True, False), Tuplex[int, str, ..., bool, ...]) is True
+# Can be written with the shortcut!
+assert isinstancex((3, "a", "b", "c"), (int, str, ...)) is True
 
 # Type
 class User: ...

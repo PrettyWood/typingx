@@ -42,7 +42,7 @@ def _isinstancex(obj: Any, tp: TypeLike) -> bool:
         return isinstancex(obj, get_args(tp))
 
     # e.g. Dict[str, int]
-    if origin is dict:
+    elif origin is dict:
         if tp is Dict:
             tp = Dict[Any, Any]
         return isinstancex(obj, dict) and _is_valid_mapping(obj, tp)
