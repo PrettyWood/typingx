@@ -20,6 +20,7 @@ __all__ = (
     # typing, typing_extensions or own backport
     "Any",
     "Dict",
+    "Generic",
     "Literal",
     "List",
     "Listx",
@@ -33,6 +34,7 @@ __all__ = (
     "Tuple",
     "Tuplex",
     "Type",
+    "TypeVar",
     "TypedDict",
     "get_args",
     "get_origin",

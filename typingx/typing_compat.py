@@ -38,12 +38,12 @@ else:
 def get_args(tp: TypeLike) -> T.Tuple[T.Any, ...]:
     if sys.version_info >= (3, 10):
         return T_get_args(tp)
-    # Handle nested literals (see https://www.python.org/dev/peps/pep-0586)
     else:
+        # Handle nested literals (see https://www.python.org/dev/peps/pep-0586)
         if is_literal(tp):
             return _get_all_literal_values(tp)
 
-        return T_get_args(tp)
+        return T_get_args(tp) or ()
 
 
 #######################################
@@ -75,18 +75,29 @@ else:
         }
 
         origin = getattr(tp, "__origin__", None)
+        # change `List[Tuple[~T, ~T]]` into `List`
+        origin = getattr(origin, "_gorg", origin)
         return typing_to_builtin_map.get(origin, origin)
 
 
 def get_origin(tp: TypeLike) -> T.Optional[TypeLike]:
-    # Python 3.7+
-    if sys.version_info >= (3, 7):
+    # Python 3.8+
+    if sys.version_info >= (3, 8):
+        return T_get_origin(tp)
+
+    # Python 3.7
+    elif sys.version_info >= (3, 7):
+        if tp is T.Generic:
+            return T.Generic
         return T_get_origin(tp)
 
     # Python 3.6
     else:
         if is_literal(tp):
             return Literal
+
+        elif tp is T.Generic:
+            return T.Generic
 
         return T_get_origin(tp)
 

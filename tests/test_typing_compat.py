@@ -5,6 +5,7 @@ import pytest
 from typingx import (
     Any,
     Dict,
+    Generic,
     List,
     Listx,
     Literal,
@@ -18,6 +19,7 @@ from typingx import (
     Tuplex,
     Type,
     TypedDict,
+    TypeVar,
     Union,
     get_args,
     get_origin,
@@ -30,6 +32,14 @@ from typingx import (
 class FullMovie(TypedDict):
     name: str
     year: int
+
+
+T = TypeVar("T")
+S = TypeVar("S", int, str)
+
+
+class StrangePair(Generic[T, S]):
+    ...
 
 
 @pytest.mark.parametrize(
@@ -56,6 +66,8 @@ class FullMovie(TypedDict):
         (Tuplex[str, int, ..., bool], (str, int, ..., bool)),
         (Sequence[int], (int,)),
         (Mapping[str, int], (str, int)),
+        (StrangePair[int, str], (int, str)),
+        (StrangePair, ()),
     ],
 )
 def test_get_args(tp, expected_args):
@@ -81,6 +93,11 @@ def test_get_args(tp, expected_args):
         (Tuplex[str, int, ...], tuple),
         (Sequence[int], collections.abc.Sequence),
         (Mapping[str, int], collections.abc.Mapping),
+        (Generic, Generic),
+        (Generic[T], Generic),
+        (Union[T, int], Union),
+        (List[Tuple[T, T]][int], list),
+        (StrangePair[int, str], StrangePair),
     ],
 )
 def test_get_origin(tp, expected_origin):
