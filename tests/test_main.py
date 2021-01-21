@@ -5,6 +5,7 @@ import pytest
 from typingx import (
     Any,
     Dict,
+    Generic,
     List,
     Listx,
     Literal,
@@ -18,6 +19,7 @@ from typingx import (
     Tuplex,
     Type,
     TypedDict,
+    TypeVar,
     Union,
     isinstancex,
 )
@@ -325,6 +327,21 @@ def test_isinstancex_newtype():
     assert isinstancex(1, ProUserId) is True
     assert isinstancex(UserId(1), UserId) is True
     assert isinstancex("3", UserId) is False
+
+
+def test_isinstancex_generic():
+    """It should support `Generic`"""
+    T = TypeVar("T")
+
+    class A(Generic[T]):
+        def method(self, arg: T) -> None:
+            ...
+
+    class B(A[int]):
+        def method(self, arg: int) -> None:
+            ...
+
+    assert isinstancex(B, Type[A[int]]) is True
 
 
 Number = Union[int, float]

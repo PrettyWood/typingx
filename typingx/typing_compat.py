@@ -5,15 +5,16 @@ for some methods / classes of the `typing` module
 import sys
 import typing as T
 
-from .utils import TypeLike, lenient_issubclass
-
 __all__ = (
     "Literal",
     "NoneType",
+    "OneOrManyTypes",
     "TypedDict",
+    "TypeLike",
     "get_args",
     "get_origin",
     "get_type_hints",
+    "is_generic",
     "is_literal",
     "is_newtype",
     "is_typeddict",
@@ -21,6 +22,8 @@ __all__ = (
 
 
 NoneType = type(None)
+TypeLike = T.Union[T.Type[T.Any], T.Union[T.Any]]
+OneOrManyTypes = T.Union[TypeLike, T.Tuple[TypeLike, ...]]
 
 
 #######################################
@@ -162,7 +165,7 @@ def is_typeddict(tp: TypeLike) -> bool:
 
     # Python 3.6 to Python 3.9
     else:
-        return lenient_issubclass(tp, dict) and hasattr(tp, "__annotations__")
+        return isinstance(tp, type) and issubclass(tp, dict) and hasattr(tp, "__annotations__")
 
 
 #######################################
@@ -210,3 +213,10 @@ def is_newtype(tp: TypeLike) -> bool:
     Check if a type is a `NewType`
     """
     return tp.__class__ is TestType.__class__
+
+
+#######################################
+# Generic
+#######################################
+def is_generic(tp: TypeLike) -> bool:
+    return hasattr(tp, "__parameters__")

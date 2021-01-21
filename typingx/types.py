@@ -1,7 +1,7 @@
 import sys
 import typing as T
 
-from .utils import OneOrManyTypes
+from .typing_compat import OneOrManyTypes
 
 __all__ = (
     "Listx",

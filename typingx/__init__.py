@@ -1,7 +1,7 @@
 # flake8: noqa
 from typing import *
 
-from .main import isinstancex
+from .main import isinstancex, issubclassx
 from .types import Listx, Tuplex
 from .typing_compat import (
     Literal,
@@ -17,6 +17,7 @@ from .typing_compat import (
 __all__ = (
     # main methods
     "isinstancex",
+    "issubclassx",
     # typing, typing_extensions or own backport
     "Any",
     "Dict",

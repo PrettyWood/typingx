@@ -1,34 +1,29 @@
 import collections.abc
-from typing import Any, Dict, List, Set, Union
+from typing import Any, Callable, Dict, List, Set, Union, cast
 
 from .types import Listx, Tuplex
 from .typing_compat import (
     Literal,
     NoneType,
+    OneOrManyTypes,
     TypedDict,
+    TypeLike,
     get_args,
     get_origin,
     get_type_hints,
+    is_generic,
     is_literal,
     is_newtype,
     is_typeddict,
 )
-from .utils import OneOrManyTypes, TypeLike, lenient_isinstance, lenient_issubclass
 
-__all__ = ("isinstancex",)
+__all__ = ("isinstancex", "issubclassx")
 
 TYPED_DICT_EXTRA_KEY = "__extra__"
 NONE_TYPES = (None, NoneType, Literal[None])
 
 
-def isinstancex(obj: Any, tp: OneOrManyTypes) -> bool:
-    try:
-        return _isinstancex(obj, tp)
-    except (AttributeError, TypeError):
-        return False
-
-
-def _isinstancex(obj: Any, tp: Any) -> bool:
+def _isinstancex(obj: Any, tp: TypeLike) -> bool:
     """Extend `isinstance` with `typing` types"""
     if tp is Any:
         return True
@@ -39,9 +34,6 @@ def _isinstancex(obj: Any, tp: Any) -> bool:
     # https://www.python.org/dev/peps/pep-0484/#using-none
     if obj is None and tp in NONE_TYPES:
         return True
-
-    if lenient_isinstance(tp, tuple):
-        return any(isinstancex(obj, sub_tp) for sub_tp in tp)
 
     origin = get_origin(tp)
 
@@ -77,10 +69,11 @@ def _isinstancex(obj: Any, tp: Any) -> bool:
 
     # e.g. Type[int]
     elif origin is type:
-        return lenient_issubclass(obj, get_args(tp))
+        return issubclassx(obj, get_args(tp))
 
     # e.g. TypedDict('Movie', {'name': str, 'year': int})
     elif is_typeddict(tp):
+        tp = cast(TypedDict, tp)
         if not (isinstance(obj, dict) and all(isinstance(k, str) for k in obj)):
             return False
 
@@ -107,7 +100,49 @@ def _isinstancex(obj: Any, tp: Any) -> bool:
     elif tp is Tuplex:
         tp = tuple
 
-    return lenient_isinstance(obj, tp)
+    return isinstance(obj, tp)
+
+
+def _issubclassx(obj: Any, tp: TypeLike) -> bool:
+    if obj is tp:
+        return True
+
+    if is_generic(obj) and is_generic(tp):
+        obj_mother_class = get_origin(obj.__orig_bases__[0])
+        obj_mother_args = get_args(obj.__orig_bases__[0])
+
+        return issubclassx(obj_mother_class, get_origin(tp)) and all(
+            issubclassx(arg, get_args(tp)) for arg in obj_mother_args
+        )
+
+    return issubclass(obj, tp)
+
+
+def _safe_multi(f: Callable[[Any, TypeLike], bool]) -> Callable[[Any, OneOrManyTypes], bool]:
+    def safe_f_multi(obj: Any, tp: OneOrManyTypes) -> bool:
+        try:
+            if isinstance(tp, tuple):
+                return any(f(obj, sub_tp) for sub_tp in tp)
+            else:
+                return f(obj, tp)
+        except (AttributeError, TypeError):
+            return False
+
+    return safe_f_multi
+
+
+isinstancex = _safe_multi(_isinstancex)
+issubclassx = _safe_multi(_issubclassx)
+
+
+#######################################
+# get_args
+#######################################
+def _is_valid_mapping(obj: Any, tp: TypeLike) -> bool:
+    keys_type, values_type = get_args(tp)
+    return all(isinstancex(key, keys_type) for key in obj.keys()) and all(
+        isinstancex(value, values_type) for value in obj.values()
+    )
 
 
 def _is_valid_sequence(obj: Any, tp: TypeLike, *, is_list: bool) -> bool:
@@ -145,13 +180,6 @@ def _is_valid_sequence(obj: Any, tp: TypeLike, *, is_list: bool) -> bool:
     else:
         # Check remaining types
         return expected_types[current_index:] in ((), (...,))
-
-
-def _is_valid_mapping(obj: Any, tp: TypeLike) -> bool:
-    keys_type, values_type = get_args(tp)
-    return all(isinstancex(key, keys_type) for key in obj.keys()) and all(
-        isinstancex(value, values_type) for value in obj.values()
-    )
 
 
 def _is_valid_typeddict(obj: Dict[str, Any], tp: TypedDict) -> bool:
