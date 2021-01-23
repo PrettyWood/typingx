@@ -1,3 +1,4 @@
+import sys
 from collections import ChainMap, Counter
 
 import pytest
@@ -200,6 +201,11 @@ def test_isinstancex_xtuple(obj, tp, expected):
 def test_isinstancex_union(obj, tp, expected):
     """It should support `Union` (and `Optional`)"""
     assert isinstancex(obj, tp) is expected
+
+
+@pytest.mark.skipif(sys.version_info < (3, 10), reason="need python 3.10")
+def test_isinstancex_union_310():
+    assert isinstancex([3, 4, 3.14], list[int | float])
 
 
 @pytest.mark.parametrize(

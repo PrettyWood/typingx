@@ -13,6 +13,9 @@ With this library, you can leverage `typing` types at runtime to do that!
 # Check if `my_list` is a list of integers
 isinstancex(my_list, [int])  # shortcut for typing.List[int]
 
+# Check if `my_list` has only numbers (3.10 syntax)
+isinstancex([3, 4, 3.14], list[int | float])
+
 # Check if `my_list` starts with 2 integers and then has only strings
 isinstancex(my_list, [int, int, str, ...])  # shortcut for Listx[int, int, str, ...] (see extra types)
 

@@ -1,4 +1,5 @@
 import collections.abc
+import sys
 from typing import Any, Callable, Dict, List, Set, Union, cast
 
 from .types import Listx, Tuplex
@@ -21,6 +22,12 @@ __all__ = ("isinstancex", "issubclassx")
 
 TYPED_DICT_EXTRA_KEY = "__extra__"
 NONE_TYPES = (None, NoneType, Literal[None])
+if sys.version_info < (3, 10):
+    UNION_TYPES = (Union,)
+else:
+    import types
+
+    UNION_TYPES = (Union, types.Union)
 
 
 def _isinstancex(obj: Any, tp: TypeLike) -> bool:
@@ -52,8 +59,8 @@ def _isinstancex(obj: Any, tp: TypeLike) -> bool:
         elif isinstance(tp, list):
             return _isinstancex(obj, Listx[tuple(tp)])
 
-    # e.g. Union[str, int]
-    if origin is Union:
+    # e.g. Union[str, int] (or str|int in 3.10)
+    if origin in UNION_TYPES:
         return isinstancex(obj, get_args(tp))
 
     # e.g. Dict[str, int]
