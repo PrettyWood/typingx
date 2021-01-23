@@ -11,19 +11,19 @@ With this library, you can leverage `typing` types at runtime to do that!
 
 ```python
 # Check if `my_list` is a list of integers
-isinstancex(my_list, [int])  # shortcut for typing.List[int]
+isinstancex(my_list, list[int])  # or typing.List[int]
 
-# Check if `my_list` has only numbers (3.10 syntax)
-isinstancex([3, 4, 3.14], list[int | float])
+# Check if `my_list` has only numbers
+isinstancex(my_list, list[int | float])  # or typing.List[typing.Union[int, float]]
 
 # Check if `my_list` starts with 2 integers and then has only strings
-isinstancex(my_list, [int, int, str, ...])  # shortcut for Listx[int, int, str, ...] (see extra types)
+isinstancex(my_list, [int, int, str, ...])  # shortcut for `Listx[int, int, str, ...]` (see extra types)
 
 # Check if `my_dict` is a mapping between integers and strings
-isinstancex(my_dict, {int: str})  # shortcut for `typing.Dict[int, str]`
+isinstancex(my_dict, dict[int, str])  # or `typing.Dict[int, str]`
 
 # Check deeper the shape of `my_dict`
-isinstancex(my_dict, {'a': int, 'b': bool, ...: str})  # shortcut for `typing.TypedDict`
+isinstancex(my_dict, {'a': int, 'b': bool, ...: str})  # shortcut for `typing.TypedDict('TD', {'a': int, 'b': bool, __extra__: str})`
 ```
 
 Since `typing` changed a lot since python `3.6`, this library also makes sure the whole behaviour
@@ -57,16 +57,14 @@ assert isinstancex({"a": 1, "b": 2}, Dict[str, str]) is False
 assert isinstancex({"a": 1, "b": 2}, Dict[int, str]) is False
 assert isinstancex({"a": 1, "b": 2}, Dict[str, Any]) is True
 
-# Dict (shortcut)
-assert isinstancex({"a": 1, "b": 2}, {str: int}) is True
-
 # List
 assert isinstancex([1, 2, 3], List[int]) is True
 assert isinstancex([1, 2, "q"], List[int]) is False
 assert isinstancex([1, 2, "q"], List[Union[str, int]]) is True
 
 # Listx
-assert isinstancex([1, 2, 3, 4], Listx[int]) is True
+assert isinstancex([1, 2, 3, 4], Listx[int]) is False
+assert isinstancex([1, 2, 3, 4], Listx[int, ...]) is True
 assert isinstancex([1, 2, "q"], Listx[int, ..., str]) is True
 assert isinstancex([1, 2, "q", "w", "e"], Listx[int, ..., str]) is False
 assert isinstancex([1, 2, "q", "w", "e"], Listx[int, ..., str, ...]) is True
@@ -110,8 +108,6 @@ assert isinstancex((1, 3, 5), Sequence[int]) is True
 # Set
 assert isinstancex({"a", "b"}, Set[str]) is True
 assert isinstancex({"a", "b"}, Set[int]) is False
-# Can be written with the shortcut!
-assert isinstancex({"a", "b"}, {str}) is True
 
 # Tuple
 assert isinstancex((1, 2), Tuple[int, ...]) is True
@@ -161,5 +157,5 @@ assert isinstancex({"name": "The Matrix", "year": 1999, "q": "w", "e": "r"}, Ext
 assert isinstancex({"name": "The Matrix", "year": 1999, "q": "w", "e": 1}, ExtraMovie) is False
 
 # TypedDict (shortcut)
-assert isinstancex({"name": "The Matrix", "year": 1999, "q": "w", "e": "r"}, {"name": str, "year": int, ...: str}) is True
+assert isinstancex({"name": "The Matrix", "year": 1999, "q": "w", "e": "r"}, {"name": str, "year": int, ...: str}) is True****
 ```

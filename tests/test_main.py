@@ -75,8 +75,6 @@ def test_isinstancex_any(obj, tp, expected):
         ({"a": 1}, Dict[str, Any], True),
         ({"a": 1}, Dict[int, Any], False),
         (["a", "b"], Dict[str, str], False),
-        # shortcut
-        ({"a": 1, "b": 3}, {str: int}, True),
     ],
 )
 def test_isinstancex_dict(obj, tp, expected):
@@ -145,7 +143,7 @@ def test_isinstancex_tuple(obj, tp, expected):
         ([3], Listx, True),
         ([3], Listx[Any], True),
         ([3], Listx[int], True),
-        ([3, 4, 5], Listx[int], True),
+        ([3, 4, 5], Listx[int], False),
         ([3, "pika"], Listx[int, int], False),
         ([3], Listx[str], False),
         ([3, "pika"], Listx[int, str, ...], True),

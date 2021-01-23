@@ -48,14 +48,10 @@ def _isinstancex(obj: Any, tp: TypeLike) -> bool:
     # - a plain dictionary to Dict or TypedDict
     # - a plain list to Listx[...]
     if origin is None:
+        # tp is of form `{'a': TypeLike, ...}`, `{...: TypeLike}`
         if isinstance(tp, dict):
             tp = {(TYPED_DICT_EXTRA_KEY if k is ... else k): v for k, v in tp.items()}
-            if len(tp) == 1 and not isinstancex(list(tp.keys())[0], str):
-                # tp is of form `{TypeLike: TypeLike}`
-                return _isinstancex(obj, Dict[list(tp.items())[0]])  # type: ignore
-            else:
-                # tp is of form `{'a': TypeLike, ...}`, `{...: TypeLike}`
-                return _isinstancex(obj, TypedDict("_TypedDict", tp))  # type: ignore
+            return _isinstancex(obj, TypedDict("_TypedDict", tp))  # type: ignore
         elif isinstance(tp, list):
             return _isinstancex(obj, Listx[tuple(tp)])
 
@@ -75,7 +71,10 @@ def _isinstancex(obj: Any, tp: TypeLike) -> bool:
         if tp is List:
             tp = List[Any]
 
-        return isinstancex(obj, list) and _is_valid_sequence(obj, tp, is_list=True)
+        name = getattr(tp, "_name", None) or getattr(tp, "__name__", None)
+
+        # We consider Listx[int] to check if a list as ONLY ONE item
+        return isinstancex(obj, list) and _is_valid_sequence(obj, tp, is_list=name != "Listx")
 
     # e.g. Set[str]
     elif origin is set:
