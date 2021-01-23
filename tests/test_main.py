@@ -74,6 +74,8 @@ def test_isinstancex_any(obj, tp, expected):
         ({"a": 1}, Dict[str, Any], True),
         ({"a": 1}, Dict[int, Any], False),
         (["a", "b"], Dict[str, str], False),
+        # shortcut
+        ({"a": 1, "b": 3}, {str: int}, True),
     ],
 )
 def test_isinstancex_dict(obj, tp, expected):
@@ -154,6 +156,8 @@ def test_isinstancex_tuple(obj, tp, expected):
         ([3, "pika", "bulbi", "cara", True], Listx[int, str, ..., bool], True),
         ([3, "pika", "bulbi", "cara", 3], Listx[int, str, ..., bool], False),
         ([3, "pika", "bulbi", "cara", True, False], Listx[int, str, ..., bool, ...], True),
+        # shortcut
+        ([3, "pika", "bulbi", "cara"], [int, str, ...], True),
     ],
 )
 def test_isinstancex_xlist(obj, tp, expected):
@@ -247,6 +251,8 @@ class StrExtra(TypedDict):
         ({"a": 1, "b": 0.1}, StrExtra, True),
         ({"a": 1, "b": 0.1, "c": "pika", "d": "bulbi"}, StrExtra, True),
         ({"a": 1, "b": 0.1, "c": "pika", "d": 1}, StrExtra, False),
+        # shortcut
+        ({"a": 1, "b": 0.1, "c": "pika"}, {"a": int, "b": float, ...: str}, True),
     ],
 )
 def test_isinstancex_typeddict(obj, tp, expected):

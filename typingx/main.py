@@ -37,6 +37,21 @@ def _isinstancex(obj: Any, tp: TypeLike) -> bool:
 
     origin = get_origin(tp)
 
+    # convert
+    # - a plain dictionary to Dict or TypedDict
+    # - a plain list to Listx[...]
+    if origin is None:
+        if isinstance(tp, dict):
+            tp = {(TYPED_DICT_EXTRA_KEY if k is ... else k): v for k, v in tp.items()}
+            if len(tp) == 1 and not isinstancex(list(tp.keys())[0], str):
+                # tp is of form `{TypeLike: TypeLike}`
+                return _isinstancex(obj, Dict[list(tp.items())[0]])  # type: ignore
+            else:
+                # tp is of form `{'a': TypeLike, ...}`, `{...: TypeLike}`
+                return _isinstancex(obj, TypedDict("_TypedDict", tp))  # type: ignore
+        elif isinstance(tp, list):
+            return _isinstancex(obj, Listx[tuple(tp)])
+
     # e.g. Union[str, int]
     if origin is Union:
         return isinstancex(obj, get_args(tp))
@@ -74,9 +89,6 @@ def _isinstancex(obj: Any, tp: TypeLike) -> bool:
     # e.g. TypedDict('Movie', {'name': str, 'year': int})
     elif is_typeddict(tp):
         tp = cast(TypedDict, tp)
-        if not (isinstance(obj, dict) and all(isinstance(k, str) for k in obj)):
-            return False
-
         return _is_valid_typeddict(obj, tp)
 
     # e.g. Literal['Pika']
@@ -182,7 +194,7 @@ def _is_valid_sequence(obj: Any, tp: TypeLike, *, is_list: bool) -> bool:
         return expected_types[current_index:] in ((), (...,))
 
 
-def _is_valid_typeddict(obj: Dict[str, Any], tp: TypedDict) -> bool:
+def _is_valid_typeddict(obj: Any, tp: TypedDict) -> bool:
     # ensure it's a dict that contains all the required keys but extra values are allowed
     resolved_annotations = get_type_hints(tp)
 

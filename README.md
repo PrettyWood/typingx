@@ -6,15 +6,25 @@
 [![license](https://img.shields.io/github/license/PrettyWood/typingx.svg)](https://github.com/PrettyWood/typingx/blob/master/LICENSE)
 
 
-How many times have you wanted to answer one of those questions in application code or while writing tests?
-- Is `x` a valid list of only `int` values
-- Is `x` a dictionary with only `'a'` and `'b'` keys
-- ...
+How many times have you wanted to check the shape of your data either in application code or while testing?
+With this library, you can leverage `typing` types at runtime to do that!
 
-This library purpose is to leverage `typing` (and `typing_extensions` for python 3.8-) types at runtime
-to do some validations on a type or an object.
+```python
+# Check if `my_list` is a list of integers
+isinstancex(my_list, [int])  # shortcut for typing.List[int]
+
+# Check if `my_list` starts with 2 integers and then has only strings
+isinstancex(my_list, [int, int, str, ...])  # shortcut for Listx[int, int, str, ...] (see extra types)
+
+# Check if `my_dict` is a mapping between integers and strings
+isinstancex(my_dict, {int: str})  # shortcut for `typing.Dict[int, str]`
+
+# Check deeper the shape of `my_dict`
+isinstancex(my_dict, {'a': int, 'b': bool, ...: str})  # shortcut for `typing.TypedDict`
+```
+
 Since `typing` changed a lot since python `3.6`, this library also makes sure the whole behaviour
-is consistent with the latest python version `3.10`.
+is consistent with `3.10` for all python versions.
 
 It hence provides:
 - `isinstancex` and `issubclassx`: like `isinstance` and `issubclass` but with `typing` types and extra types provided by this library
@@ -22,7 +32,7 @@ It hence provides:
 - `is_literal`, `is_newtype`, `is_typeddict` helpers
 - most `typing` types but with homogeneous behaviour (e.g. with `3.8`, this libray will choose `typing_extensions.TypedDict` instead of `typing.TypedDict` since the latter doesn't store information to distinguish optional and required keys)
 - extanded types:
-  * `TypedDict` has a `__extra__` field (value can be changed) to allow type checking on optional fields
+  * `TypedDict` with `...` field to allow type checking on optional fields
 - extra types:
   * `Listx` and `Tuplex`: more sophisticated versions of `List` and `Tuple` to add `...` anywhere in the parameters
 
@@ -43,7 +53,8 @@ assert isinstancex({"a": 1, "b": 2}, Dict[str, int]) is True
 assert isinstancex({"a": 1, "b": 2}, Dict[str, str]) is False
 assert isinstancex({"a": 1, "b": 2}, Dict[int, str]) is False
 assert isinstancex({"a": 1, "b": 2}, Dict[str, Any]) is True
-# Can be written with the shortcut!
+
+# Dict (shortcut)
 assert isinstancex({"a": 1, "b": 2}, {str: int}) is True
 
 # List
@@ -58,8 +69,9 @@ assert isinstancex([1, 2, "q", "w", "e"], Listx[int, ..., str]) is False
 assert isinstancex([1, 2, "q", "w", "e"], Listx[int, ..., str, ...]) is True
 assert isinstancex([1, 2, "q", "w", b"xyz", "e"], Listx[int, ..., str, ...]) is False
 assert isinstancex([1, 2, "q", "w", b"xyz", "e"], Listx[int, ..., Union[str, bytes], ...]) is True
-# Can be written with the shortcut!
-assert isinstancex([1, 2, 3, 4], [int]) is True
+
+# Listx (shortcut)
+assert isinstancex([1, 2, 3, 4, "q"], [int, ..., str]) is True
 
 # Literal
 assert isinstancex("a", Literal["a"]) is True
@@ -110,8 +122,6 @@ assert isinstancex((3, "a", "b", "c"), Tuplex[int, str, ..., bool]) is False
 assert isinstancex((3, "a", "b", "c", True), Tuplex[int, str, ..., bool]) is True
 assert isinstancex((3, "a", "b", "c", 3), Tuplex[int, str, ..., bool]) is False
 assert isinstancex((3, "a", "b", "c", True, False), Tuplex[int, str, ..., bool, ...]) is True
-# Can be written with the shortcut!
-assert isinstancex((3, "a", "b", "c"), (int, str, ...)) is True
 
 # Type
 class User: ...
@@ -146,4 +156,7 @@ assert isinstancex({"name": "The Matrix", "year": 1999, "extra": "qwe"}, Partial
 assert isinstancex({"name": "The Matrix", "year": 1999}, ExtraMovie) is True
 assert isinstancex({"name": "The Matrix", "year": 1999, "q": "w", "e": "r"}, ExtraMovie) is True
 assert isinstancex({"name": "The Matrix", "year": 1999, "q": "w", "e": 1}, ExtraMovie) is False
+
+# TypedDict (shortcut)
+assert isinstancex({"name": "The Matrix", "year": 1999, "q": "w", "e": "r"}, {"name": str, "year": int, ...: str}) is True
 ```
