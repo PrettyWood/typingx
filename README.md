@@ -65,6 +65,15 @@ from collections import ChainMap, Counter
 
 from typingx import *
 
+# Callable
+def gt(x: int, y: int) -> bool:
+    return x > y
+
+assert isinstancex(gt, Callable) is True
+assert isinstancex(gt, Callable[..., Any]) is True
+assert isinstancex(gt, Callable[..., bool]) is True
+assert isinstancex(gt, Callable[[int, int], bool]) is True
+
 # Dict
 assert isinstancex({"a": 1, "b": 2}, Dict[str, int]) is True
 assert isinstancex({"a": 1, "b": 2}, Dict[str, str]) is False
@@ -171,5 +180,9 @@ assert isinstancex({"name": "The Matrix", "year": 1999, "q": "w", "e": "r"}, Ext
 assert isinstancex({"name": "The Matrix", "year": 1999, "q": "w", "e": 1}, ExtraMovie) is False
 
 # TypedDict (shortcut)
-assert isinstancex({"name": "The Matrix", "year": 1999, "q": "w", "e": "r"}, {"name": str, "year": int, ...: str}) is True****
+assert isinstancex({"name": "The Matrix", "year": 1999, "q": "w", "e": "r"}, {"name": str, "year": int, ...: str}) is True
+
+# Union
+assert isinstancex(3, Union[str, int]) is True
+assert isinstancex(3, Union[str, float]) is False
 ```
