@@ -13,14 +13,23 @@ _This is even more powerful when used with generic standard collections (e.g. `l
 introduced in python 3.10. If you want to use them with older version, a backport [future-typing](https://github.com/PrettyWood/future-typing) exists!_
 
 ```python
+# Check if `x` is a string
+isinstancex(x, str)
+
+# Check if `x` is a string or an integer
+isinstancex(x, str | int)  # or typing.Union[str, int]
+
 # Check if `my_list` is a list of integers
 isinstancex(my_list, list[int])  # or typing.List[int]
 
 # Check if `my_list` has only numbers
 isinstancex(my_list, list[int | float])  # or typing.List[typing.Union[int, float]]
 
-# Check if `my_list` starts with 2 integers and then has only strings
+# Check if `my_list` is a list starting with 2 integers and then has only strings
 isinstancex(my_list, [int, int, str, ...])  # shortcut for `Listx[int, int, str, ...]` (see extra types)
+
+# Check if `my_tuple` is a tuple starting with only integers and then only floats
+isinstancex(my_tuple, (int, ..., float, ...))  # shortcut for `Tuplex[int, ..., float, ...]` (see extra types)
 
 # Check if `my_dict` is a mapping between integers and strings
 isinstancex(my_dict, dict[int, str])  # or `typing.Dict[int, str]`
@@ -35,7 +44,7 @@ is consistent with `3.10` for all python versions.
 It hence provides:
 - `isinstancex` and `issubclassx`: like `isinstance` and `issubclass` but with `typing` types and extra types provided by this library
   
-  :warning: using a tuple as second parameter will validate against `Tuplex`. If you want to check against `(int, str)`, wrap it into `Union[(int, str)]`
+  :warning: using a tuple as second parameter will validate against `Tuplex`. If you want to check against multiple types `(int, str)`, wrap it into `Union[(int, str)]`
 - `get_args` and `get_origin` that have the exact same behaviour as the `3.10` python version ones, no matter which python version is used (the only exception being `get_args` with `Generic` on python 3.6)
 - `is_literal`, `is_newtype`, `is_typeddict` helpers
 - most `typing` types but with homogeneous behaviour (e.g. with `3.8`, this libray will choose `typing_extensions.TypedDict` instead of `typing.TypedDict` since the latter doesn't store information to distinguish optional and required keys)

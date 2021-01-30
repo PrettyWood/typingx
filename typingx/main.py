@@ -46,6 +46,7 @@ def _isinstancex(obj: Any, tp: TypeLike) -> bool:
     # convert
     # - a plain dictionary to Dict or TypedDict
     # - a plain list to Listx[...]
+    # - a plain tuple to Tuplex[...]
     if origin is None:
         # tp is of form `{'a': TypeLike, ...}`, `{...: TypeLike}`
         if isinstance(tp, dict):
@@ -53,6 +54,8 @@ def _isinstancex(obj: Any, tp: TypeLike) -> bool:
             return isinstancex(obj, TypedDict("_TypedDict", tp))  # type: ignore
         elif isinstance(tp, list):
             return isinstancex(obj, Listx[tuple(tp)])
+        elif isinstance(tp, tuple):
+            return isinstancex(obj, Tuplex[tuple(tp)])
 
     # e.g. Union[str, int] (or str|int in 3.10)
     if origin in UNION_TYPES:

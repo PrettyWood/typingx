@@ -179,6 +179,8 @@ def test_isinstancex_xlist(obj, tp, expected):
         ((3, "pika", "bulbi", "cara", True), Tuplex[int, str, ..., bool], True),
         ((3, "pika", "bulbi", "cara", 3), Tuplex[int, str, ..., bool], False),
         ((3, "pika", "bulbi", "cara", True, False), Tuplex[int, str, ..., bool, ...], True),
+        # shortcut
+        ((3, "pika", "bulbi", "cara", True, False), (int, str, ..., bool, ...), True),
     ],
 )
 def test_isinstancex_xtuple(obj, tp, expected):
