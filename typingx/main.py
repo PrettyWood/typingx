@@ -1,6 +1,6 @@
 import collections.abc
 import sys
-from typing import Any, Callable, Dict, List, Set, Union, cast
+from typing import Any, Callable, Dict, List, Set, Tuple, Union, cast
 
 from .types import Listx, Tuplex
 from .typing_compat import (
@@ -60,6 +60,28 @@ def _isinstancex(obj: Any, tp: TypeLike) -> bool:
     # e.g. Union[str, int] (or str|int in 3.10)
     if origin in UNION_TYPES:
         return any(isinstancex(obj, arg) for arg in get_args(tp))
+
+    # e.g. Callable[[int], str]
+    elif origin is collections.abc.Callable:
+        if not callable(obj):
+            return False
+
+        expected_args_types, expected_return_type = get_args(tp) or (..., Any)
+
+        if expected_args_types is ... and expected_return_type is Any:
+            return True
+
+        args_types, return_type = _get_function_type_hints(obj)
+
+        if not issubclassx(return_type, expected_return_type):
+            return False
+
+        if expected_args_types is ...:
+            return True
+
+        return len(args_types) == len(expected_args_types) and all(
+            issubclassx(a_tp, e_tp) for (a_tp, e_tp) in zip(args_types, expected_args_types)
+        )
 
     # e.g. Dict[str, int]
     elif origin is dict:
@@ -124,6 +146,12 @@ def _isinstancex(obj: Any, tp: TypeLike) -> bool:
 
 
 def _issubclassx(obj: Any, tp: TypeLike) -> bool:
+    if tp is Any:
+        return True
+
+    if obj in NONE_TYPES and tp in NONE_TYPES:
+        return True
+
     origin = get_origin(tp)
 
     if origin in UNION_TYPES:
@@ -219,3 +247,33 @@ def _is_valid_typeddict(obj: Any, tp: TypedDict) -> bool:
             return False
 
         return all(isinstancex(v, resolved_annotations[k]) for k, v in obj.items())
+
+
+def _get_function_type_hints(obj: Callable[..., Any]) -> Tuple[List[TypeLike], TypeLike]:
+    """Return a tuple <list of types of arguments>, <return type>"""
+    import inspect
+    import warnings
+
+    sig = inspect.signature(obj)
+
+    args_types: List[TypeLike] = []
+
+    for name, parameter in sig.parameters.items():
+        tp = parameter.annotation
+        if tp is sig.empty:
+            warnings.warn(
+                f"No type hint specified for arg {name!r} of {obj.__name__!r}...fallback on `Any`",
+                UserWarning,
+            )
+            tp = Any
+        args_types.append(tp)
+
+    return_type = sig.return_annotation
+    if return_type is sig.empty:
+        warnings.warn(
+            f"No return type hint specified for {obj.__name__!r}...fallback on `Any`",
+            UserWarning,
+        )
+        return_type = Any
+
+    return args_types, return_type

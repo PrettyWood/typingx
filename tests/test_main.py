@@ -5,6 +5,7 @@ import pytest
 
 from typingx import (
     Any,
+    Callable,
     Dict,
     List,
     Listx,
@@ -35,6 +36,10 @@ class Pika(Pokemon):
 
 class Bulbi(Pokemon):
     ...
+
+
+def f(x: int) -> str:
+    return str(x)
 
 
 @pytest.mark.parametrize(
@@ -280,6 +285,61 @@ def test_isinstancex_typeddict(obj, tp, expected):
 def test_isinstancex_literal(obj, tp, expected):
     """It should support `Literal`"""
     assert isinstancex(obj, tp) is expected
+
+
+@pytest.mark.parametrize(
+    "obj,tp,expected",
+    [
+        (3, Callable, False),
+        (f, Callable, True),
+        (f, Callable[..., str], True),
+        (f, Callable[..., int], False),
+        (f, Callable[[int], str], True),
+        (f, Callable[[str], str], False),
+        (f, Callable[[int, str], str], False),
+    ],
+)
+def test_isinstancex_callable(obj, tp, expected):
+    """It should support `Callable`"""
+    assert isinstancex(obj, tp) is expected
+
+
+def test_isinstancex_callable_missing_return_type():
+    def no_return(x: int):
+        pass
+
+    assert isinstancex(no_return, Callable) is True
+    assert isinstancex(no_return, Callable[..., Any]) is True
+
+    with pytest.warns(UserWarning, match="No return type hint specified for 'no_return'"):
+        assert isinstancex(no_return, Callable[[int], Any]) is True
+        assert isinstancex(no_return, Callable[[int], str]) is False
+
+
+def test_isinstancex_callable_missing_arg_type():
+    def no_arg(x: int, y) -> None:
+        pass
+
+    assert isinstancex(no_arg, Callable) is True
+    assert isinstancex(no_arg, Callable[..., Any]) is True
+
+    with pytest.warns(UserWarning, match="No type hint specified for arg 'y' of 'no_arg'"):
+        assert isinstancex(no_arg, Callable[[int, Any], None]) is True
+        assert isinstancex(no_arg, Callable[[int, Any], Any]) is True
+        assert isinstancex(no_arg, Callable[[int, str], None]) is False
+
+
+def test_isinstancex_callable_missing_everything():
+    def no_everything(x, y):
+        pass
+
+    assert isinstancex(no_everything, Callable) is True
+    assert isinstancex(no_everything, Callable[..., Any]) is True
+
+    with pytest.warns(UserWarning):
+        assert isinstancex(no_everything, Callable[[Any, Any], Any]) is True
+        assert isinstancex(no_everything, Callable[[Any], Any]) is False
+        assert isinstancex(no_everything, Callable[[Any, Any, Any], Any]) is False
 
 
 @pytest.mark.parametrize(
