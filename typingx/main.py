@@ -12,7 +12,6 @@ from .typing_compat import (
     get_args,
     get_origin,
     get_type_hints,
-    is_generic,
     is_literal,
     is_newtype,
     is_typeddict,
@@ -51,13 +50,13 @@ def _isinstancex(obj: Any, tp: TypeLike) -> bool:
         # tp is of form `{'a': TypeLike, ...}`, `{...: TypeLike}`
         if isinstance(tp, dict):
             tp = {(TYPED_DICT_EXTRA_KEY if k is ... else k): v for k, v in tp.items()}
-            return _isinstancex(obj, TypedDict("_TypedDict", tp))  # type: ignore
+            return isinstancex(obj, TypedDict("_TypedDict", tp))  # type: ignore
         elif isinstance(tp, list):
-            return _isinstancex(obj, Listx[tuple(tp)])
+            return isinstancex(obj, Listx[tuple(tp)])
 
     # e.g. Union[str, int] (or str|int in 3.10)
     if origin in UNION_TYPES:
-        return isinstancex(obj, get_args(tp))
+        return any(isinstancex(obj, arg) for arg in get_args(tp))
 
     # e.g. Dict[str, int]
     elif origin is dict:
@@ -82,7 +81,7 @@ def _isinstancex(obj: Any, tp: TypeLike) -> bool:
         if tp is Set:
             tp = Set[Any]
 
-        return isinstancex(obj, set) and all(isinstancex(x, get_args(tp)) for x in obj)
+        return isinstancex(obj, set) and all(isinstancex(x, Union[get_args(tp)]) for x in obj)
 
     # e.g. Tuple[int, ...] or Tuplex[int, str, ...]
     elif origin is tuple:
@@ -90,7 +89,7 @@ def _isinstancex(obj: Any, tp: TypeLike) -> bool:
 
     # e.g. Type[int]
     elif origin is type:
-        return issubclassx(obj, get_args(tp))
+        return issubclassx(obj, Union[get_args(tp)])
 
     # e.g. TypedDict('Movie', {'name': str, 'year': int})
     elif is_typeddict(tp):
@@ -122,35 +121,26 @@ def _isinstancex(obj: Any, tp: TypeLike) -> bool:
 
 
 def _issubclassx(obj: Any, tp: TypeLike) -> bool:
-    if obj is tp:
-        return True
+    origin = get_origin(tp)
 
-    if is_generic(obj) and is_generic(tp):
-        obj_mother_class = get_origin(obj.__orig_bases__[0])
-        obj_mother_args = get_args(obj.__orig_bases__[0])
-
-        return issubclassx(obj_mother_class, get_origin(tp)) and all(
-            issubclassx(arg, get_args(tp)) for arg in obj_mother_args
-        )
+    if origin in UNION_TYPES:
+        return any(issubclassx(obj, arg) for arg in get_args(tp))
 
     return issubclass(obj, tp)
 
 
-def _safe_multi(f: Callable[[Any, TypeLike], bool]) -> Callable[[Any, OneOrManyTypes], bool]:
-    def safe_f_multi(obj: Any, tp: OneOrManyTypes) -> bool:
+def _safe(f: Callable[[Any, TypeLike], bool]) -> Callable[[Any, OneOrManyTypes], bool]:
+    def safe_f(obj: Any, tp: OneOrManyTypes) -> bool:
         try:
-            if isinstance(tp, tuple):
-                return any(f(obj, sub_tp) for sub_tp in tp)
-            else:
-                return f(obj, tp)
+            return f(obj, tp)
         except (AttributeError, TypeError):
             return False
 
-    return safe_f_multi
+    return safe_f
 
 
-isinstancex = _safe_multi(_isinstancex)
-issubclassx = _safe_multi(_issubclassx)
+isinstancex = _safe(_isinstancex)
+issubclassx = _safe(_issubclassx)
 
 
 #######################################

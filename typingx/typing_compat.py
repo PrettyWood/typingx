@@ -14,7 +14,6 @@ __all__ = (
     "get_args",
     "get_origin",
     "get_type_hints",
-    "is_generic",
     "is_literal",
     "is_newtype",
     "is_typeddict",
@@ -213,10 +212,3 @@ def is_newtype(tp: TypeLike) -> bool:
     Check if a type is a `NewType`
     """
     return tp.__class__ is TestType.__class__
-
-
-#######################################
-# Generic
-#######################################
-def is_generic(tp: TypeLike) -> bool:
-    return hasattr(tp, "__parameters__")

@@ -6,7 +6,6 @@ import pytest
 from typingx import (
     Any,
     Dict,
-    Generic,
     List,
     Listx,
     Literal,
@@ -20,9 +19,9 @@ from typingx import (
     Tuplex,
     Type,
     TypedDict,
-    TypeVar,
     Union,
     isinstancex,
+    issubclassx,
 )
 
 
@@ -339,21 +338,6 @@ def test_isinstancex_newtype():
     assert isinstancex("3", UserId) is False
 
 
-def test_isinstancex_generic():
-    """It should support `Generic`"""
-    T = TypeVar("T")
-
-    class A(Generic[T]):
-        def method(self, arg: T) -> None:
-            ...
-
-    class B(A[int]):
-        def method(self, arg: int) -> None:
-            ...
-
-    assert isinstancex(B, Type[A[int]]) is True
-
-
 Number = Union[int, float]
 
 
@@ -369,3 +353,15 @@ Number = Union[int, float]
 def test_isinstancex_mix(obj, tp, expected):
     """It should support a mix of all those types"""
     assert isinstancex(obj, tp) is expected
+
+
+@pytest.mark.parametrize(
+    "obj,tp,expected",
+    [
+        (int, int, True),
+        (int, Union[str, int], True),
+    ],
+)
+def test_issubclassx(obj, tp, expected):
+    """It should support union in subclass"""
+    assert issubclassx(obj, tp) is expected
