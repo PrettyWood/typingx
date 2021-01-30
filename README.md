@@ -145,6 +145,9 @@ assert isinstancex((3, "a", "b", "c", True), Tuplex[int, str, ..., bool]) is Tru
 assert isinstancex((3, "a", "b", "c", 3), Tuplex[int, str, ..., bool]) is False
 assert isinstancex((3, "a", "b", "c", True, False), Tuplex[int, str, ..., bool, ...]) is True
 
+# Tuplex (shortcut)
+assert isinstancex((True, "q", "q", "q", "q"), (bool, Literal["q"], ...)) is True
+
 # Type
 class User: ...
 class BaseUser(User): ...
