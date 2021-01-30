@@ -20,7 +20,9 @@ __all__ = (
     "issubclassx",
     # typing, typing_extensions or own backport
     "Any",
+    "Callable",
     "Dict",
+    "Generic",
     "Literal",
     "List",
     "Listx",

@@ -4,6 +4,7 @@ import pytest
 
 from typingx import (
     Any,
+    Callable,
     Dict,
     Generic,
     List,
@@ -68,6 +69,9 @@ class StrangePair(Generic[T, S]):
         (Mapping[str, int], (str, int)),
         (StrangePair[int, str], (int, str)),
         (StrangePair, ()),
+        (Callable, ()),
+        (Callable[..., str], (..., str)),
+        (Callable[[int], str], ([int], str)),
     ],
 )
 def test_get_args(tp, expected_args):
@@ -98,6 +102,9 @@ def test_get_args(tp, expected_args):
         (Union[T, int], Union),
         (List[Tuple[T, T]][int], list),
         (StrangePair[int, str], StrangePair),
+        (Callable, collections.abc.Callable),
+        (Callable[..., str], collections.abc.Callable),
+        (Callable[[int], str], collections.abc.Callable),
     ],
 )
 def test_get_origin(tp, expected_origin):

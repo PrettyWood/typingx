@@ -2,6 +2,7 @@
 Module that handles differences between supported versions of Python
 for some methods / classes of the `typing` module
 """
+import collections.abc
 import sys
 import typing as T
 
@@ -28,13 +29,24 @@ OneOrManyTypes = T.Union[TypeLike, T.Tuple[TypeLike, ...]]
 #######################################
 # get_args
 #######################################
-if sys.version_info >= (3, 8):
+if sys.version_info >= (3, 9):
     T_get_args = T.get_args
+
+elif sys.version_info[:2] == (3, 8):
+
+    def T_get_args(tp: TypeLike) -> T.Tuple[T.Any, ...]:
+        if tp is T.Callable:  # fallback since it fails on MacOS
+            return ()
+        return T.get_args(tp)
+
 
 else:
 
     def T_get_args(tp: TypeLike) -> T.Tuple[T.Any, ...]:
-        return getattr(tp, "__args__", ())
+        args = getattr(tp, "__args__", ())
+        if get_origin(tp) is collections.abc.Callable and args and args[0] is not Ellipsis:
+            return (list(args[:-1]), args[-1])
+        return args
 
 
 def get_args(tp: TypeLike) -> T.Tuple[T.Any, ...]:
@@ -61,12 +73,12 @@ elif sys.version_info[:2] == (3, 7):
 
 
 else:
-    import collections.abc
 
     def T_get_origin(tp: TypeLike) -> T.Optional[TypeLike]:
         # In python 3.6, the origin of `List[str]` for example
         # is `List` and not `list`. We hence need an explicit mapping...
         typing_to_builtin_map = {
+            T.Callable: collections.abc.Callable,
             T.Dict: dict,
             T.List: list,
             T.Mapping: collections.abc.Mapping,
@@ -76,9 +88,10 @@ else:
             T.Type: type,
         }
 
-        origin = getattr(tp, "__origin__", None)
-        # change `List[Tuple[~T, ~T]]` into `List`
-        origin = getattr(origin, "_gorg", origin)
+        if hasattr(tp, "_gorg"):
+            origin = tp._gorg
+        else:
+            origin = getattr(tp, "__origin__", None)
         return typing_to_builtin_map.get(origin, origin)
 
 
