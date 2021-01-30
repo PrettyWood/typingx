@@ -9,6 +9,9 @@
 How many times have you wanted to check the shape of your data either in application code or while testing?
 With this library, you can leverage `typing` types at runtime to do that!
 
+_This is even more powerful when used with generic standard collections (e.g. `list[str]`) introduced in python 3.9 and new union operator `|`
+introduced in python 3.10. If you want to use them with older version, a backport [future-typing](https://github.com/PrettyWood/future-typing) exists!_
+
 ```python
 # Check if `my_list` is a list of integers
 isinstancex(my_list, list[int])  # or typing.List[int]
