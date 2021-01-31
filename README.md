@@ -65,14 +65,17 @@ from collections import ChainMap, Counter
 
 from typingx import *
 
-# Callable
-def gt(x: int, y: int) -> bool:
-    return x > y
+T, U = TypeVar('T'), TypeVar('U')
 
-assert isinstancex(gt, Callable) is True
-assert isinstancex(gt, Callable[..., Any]) is True
-assert isinstancex(gt, Callable[..., bool]) is True
-assert isinstancex(gt, Callable[[int, int], bool]) is True
+# Callable
+def f(x: int, y: float) -> str:
+    return f'{x}{y}'
+
+assert isinstancex(f, Callable) is True
+assert isinstancex(f, Callable[..., Any]) is True
+assert isinstancex(f, Callable[..., str]) is True
+assert isinstancex(f, Callable[[int, float], str]) is True
+assert isinstancex(f, Callable[[T, float], U][int, str]) is True
 
 # Dict
 assert isinstancex({"a": 1, "b": 2}, Dict[str, int]) is True
@@ -188,4 +191,6 @@ assert isinstancex({"name": "The Matrix", "year": 1999, "q": "w", "e": "r"}, {"n
 # Union
 assert isinstancex(3, Union[str, int]) is True
 assert isinstancex(3, Union[str, float]) is False
+assert isinstancex(3.14, Union[int, T, str][bool]) is False
+assert isinstancex(3.14, Union[int, T, str][float]) is True
 ```
