@@ -20,13 +20,13 @@ from .typing_compat import (
 __all__ = ("isinstancex", "issubclassx")
 
 TYPED_DICT_EXTRA_KEY = "__extra__"
-NONE_TYPES = (None, NoneType, Literal[None])
+NONE_TYPES = {None, NoneType, Literal[None]}
 if sys.version_info < (3, 10):
-    UNION_TYPES = (Union,)
+    UNION_TYPES = {Union}
 else:
     import types
 
-    UNION_TYPES = (Union, types.Union)
+    UNION_TYPES = {Union, types.Union}
 
 
 def _isinstancex(obj: Any, tp: TypeLike) -> bool:
