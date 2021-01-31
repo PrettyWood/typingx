@@ -152,12 +152,27 @@ def _issubclassx(obj: Any, tp: TypeLike) -> bool:
     if obj in NONE_TYPES and tp in NONE_TYPES:
         return True
 
-    origin = get_origin(tp)
+    obj_type = get_origin(obj)
+    obj_args = get_args(obj)
 
-    if origin in UNION_TYPES:
-        return any(issubclassx(obj, arg) for arg in get_args(tp))
+    ref_type = get_origin(tp) or tp
+    ref_args = get_args(tp) or (Any, ...)
 
-    return issubclass(obj, tp)
+    if obj_type in UNION_TYPES:
+        return all(issubclassx(o, tp) for o in obj_args)
+
+    if ref_type in UNION_TYPES:
+        return any(issubclassx(obj, ref) for ref in ref_args)
+
+    if obj_type is None:
+        return issubclass(obj, ref_type)
+
+    if ref_args == (Any, ...):
+        return True
+
+    return len(obj_args) == len(ref_args) and all(
+        issubclassx(o, r) for o, r in zip(obj_args, ref_args)
+    )
 
 
 def _safe(f: Callable[[Any, TypeLike], bool]) -> Callable[[Any, OneOrManyTypes], bool]:
