@@ -45,7 +45,7 @@ It hence provides:
 - `isinstancex` and `issubclassx`: like `isinstance` and `issubclass` but with `typing` types and extra types provided by this library
   
   :warning: using a tuple as second parameter will validate against `Tuplex`. If you want to check against multiple types `(int, str)`, wrap it into `Union[(int, str)]`
-- `get_args` and `get_origin` that have the exact same behaviour as the `3.10` python version ones, no matter which python version is used (the only exception being `get_args` with `Generic` on python 3.6)
+- `get_args` and `get_origin` that have the exact same behaviour as the `3.10` python version ones, no matter which python version is used
 - `is_literal`, `is_newtype`, `is_typeddict` helpers
 - most `typing` types but with homogeneous behaviour (e.g. with `3.8`, this libray will choose `typing_extensions.TypedDict` instead of `typing.TypedDict` since the latter doesn't store information to distinguish optional and required keys)
 - extanded types:

@@ -40,12 +40,35 @@ elif sys.version_info[:2] == (3, 8):
         return T.get_args(tp)
 
 
+elif sys.version_info[:2] == (3, 7):
+
+    def T_get_args(tp: TypeLike) -> T.Tuple[T.Any, ...]:
+        args = getattr(tp, "__args__", ())
+        origin = get_origin(tp)
+        if origin is collections.abc.Callable and args and args[0] is not Ellipsis:
+            return (list(args[:-1]), args[-1])
+
+        return args
+
+
 else:
 
     def T_get_args(tp: TypeLike) -> T.Tuple[T.Any, ...]:
         args = getattr(tp, "__args__", ())
-        if get_origin(tp) is collections.abc.Callable and args and args[0] is not Ellipsis:
-            return (list(args[:-1]), args[-1])
+        origin = getattr(tp, "__origin__", None)
+
+        # handle generics
+        origin_parameters = getattr(origin, "__parameters__", None)  # e.g. (~T,)
+        origin_args = getattr(origin, "__args__", ())  # e.g. (<class 'int'>, ~T, <class 'str'>)
+        if origin_parameters and origin_args:
+            # in this case `args` contains only the types of generic parameters (e.g. `(float,)`)
+            # and `origin_parameters` contain the generic typevars (e.g. `(~T,)`)
+            generic_to_resolved = {typevar: tp for typevar, tp in zip(origin_parameters, args)}
+            args = tuple(generic_to_resolved.get(tp, tp) for tp in origin_args)
+
+        if getattr(origin, "_gorg", None) is T.Callable and args and args[0] is not Ellipsis:
+            args = (list(args[:-1]), args[-1])
+
         return args
 
 

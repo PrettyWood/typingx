@@ -35,8 +35,9 @@ class FullMovie(TypedDict):
     year: int
 
 
-T = TypeVar("T")
 S = TypeVar("S", int, str)
+T = TypeVar("T")
+U = TypeVar("U")
 
 
 class StrangePair(Generic[T, S]):
@@ -72,6 +73,10 @@ class StrangePair(Generic[T, S]):
         (Callable, ()),
         (Callable[..., str], (..., str)),
         (Callable[[int], str], ([int], str)),
+        (Union[int, T, str][float], (int, float, str)),
+        (Callable[[], T][int], ([], int)),
+        (Callable[[T], T][int], ([int], int)),
+        (Callable[[T, float], U][int, str], ([int, float], str)),
     ],
 )
 def test_get_args(tp, expected_args):
