@@ -439,6 +439,10 @@ def test_isinstancex_mix(obj, tp, expected):
         (Tuple[int, str], Tuple[Any, ...], True),
         (Tuple[int, str], Tuple[object, ...], True),
         (Tuple[int, str], Tuple[Any], False),
+        (Tuple[int, int], (int,), False),
+        (Tuple[int, int], (int, ...), True),
+        (Tuple[int, int], (int, str), False),
+        (Tuple[int, int], (int, Any), True),
     ],
 )
 def test_issubclassx(obj, tp, expected):

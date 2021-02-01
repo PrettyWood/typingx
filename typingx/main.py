@@ -152,6 +152,11 @@ def _issubclassx(obj: Any, tp: TypeLike) -> bool:
     if obj in NONE_TYPES and tp in NONE_TYPES:
         return True
 
+    # convert
+    # - a plain tuple to Tuplex[...]
+    if isinstance(tp, tuple):
+        return issubclassx(obj, Tuplex[tuple(tp)])
+
     obj_type = get_origin(obj)
     obj_args = get_args(obj)
 
