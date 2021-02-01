@@ -437,6 +437,7 @@ def test_isinstancex_mix(obj, tp, expected):
         (Tuple[int], Tuple[Any], True),
         (Tuple[int], Tuple[Any, ...], True),
         (Tuple[int, str], Tuple[Any, ...], True),
+        (Tuple[int, str], Tuple[object, ...], True),
         (Tuple[int, str], Tuple[Any], False),
     ],
 )

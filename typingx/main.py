@@ -167,8 +167,8 @@ def _issubclassx(obj: Any, tp: TypeLike) -> bool:
     if obj_type is None:
         return issubclass(obj, ref_type)
 
-    if ref_args == (Any, ...):
-        return True
+    if len(ref_args) == 2 and ref_args[1] is ...:
+        ref_args = (ref_args[0],) * len(obj_args)
 
     return len(obj_args) == len(ref_args) and all(
         issubclassx(o, r) for o, r in zip(obj_args, ref_args)

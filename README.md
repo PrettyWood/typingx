@@ -207,6 +207,6 @@ assert issubclassx(int, int | str) is True
 assert issubclassx(tuple[int], tuple) is True
 assert issubclassx(tuple[int], tuple[Any]) is True
 assert issubclassx(tuple[int], tuple[Any, ...]) is True
-assert issubclassx(tuple[int, str], tuple[Any, ...]) is True
+assert issubclassx(tuple[int, str], tuple[object, ...]) is True
 assert issubclassx(tuple[int, str], tuple[Any]) is False
 ```
