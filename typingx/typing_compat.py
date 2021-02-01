@@ -43,6 +43,9 @@ elif sys.version_info[:2] == (3, 8):
 elif sys.version_info[:2] == (3, 7):
 
     def T_get_args(tp: TypeLike) -> T.Tuple[T.Any, ...]:
+        if getattr(tp, "_special", False):
+            return ()
+
         args = getattr(tp, "__args__", ())
         origin = get_origin(tp)
         if origin is collections.abc.Callable and args and args[0] is not Ellipsis:
@@ -103,6 +106,7 @@ else:
         typing_to_builtin_map = {
             T.Callable: collections.abc.Callable,
             T.Dict: dict,
+            T.FrozenSet: frozenset,
             T.List: list,
             T.Mapping: collections.abc.Mapping,
             T.Set: set,

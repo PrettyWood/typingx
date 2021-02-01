@@ -22,6 +22,7 @@ __all__ = (
     "Any",
     "Callable",
     "Dict",
+    "FrozenSet",
     "Generic",
     "Literal",
     "List",
