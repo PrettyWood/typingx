@@ -42,7 +42,7 @@ Since `typing` changed a lot since python `3.6`, this library also makes sure th
 is consistent with `3.10` for all python versions.
 
 It hence provides:
-- `isinstancex` and `issubclassx`: like `isinstance` and `issubclass` but with `typing` types and extra types provided by this library
+- [`isinstancex`](#isinstancex) and [`issubclassx`](#issubclassx): like `isinstance` and `issubclass` but with `typing` types and extra types provided by this library
   
   :warning: using a tuple as second parameter will validate against `Tuplex`. If you want to check against multiple types `(int, str)`, wrap it into `Union[(int, str)]`
 - `get_args` and `get_origin` that have the exact same behaviour as the `3.10` python version ones, no matter which python version is used
@@ -59,7 +59,8 @@ It hence provides:
     pip install typingx
 ```
 
-## Usage
+## isinstancex
+
 ```python
 from collections import ChainMap, Counter
 
@@ -193,4 +194,19 @@ assert isinstancex(3, Union[str, int]) is True
 assert isinstancex(3, Union[str, float]) is False
 assert isinstancex(3.14, Union[int, T, str][bool]) is False
 assert isinstancex(3.14, Union[int, T, str][float]) is True
+```
+
+## issubclassx (:warning: still in WIP)
+```python
+from typingx import *
+
+assert issubclassx(int, int) is True
+assert issubclassx(int, object) is True
+assert issubclassx(int, float) is False
+assert issubclassx(int, int | str) is True
+assert issubclassx(tuple[int], tuple) is True
+assert issubclassx(tuple[int], tuple[Any]) is True
+assert issubclassx(tuple[int], tuple[Any, ...]) is True
+assert issubclassx(tuple[int, str], tuple[Any, ...]) is True
+assert issubclassx(tuple[int, str], tuple[Any]) is False
 ```
