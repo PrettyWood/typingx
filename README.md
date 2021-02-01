@@ -42,10 +42,10 @@ Since `typing` changed a lot since python `3.6`, this library also makes sure th
 is consistent with `3.10` for all python versions.
 
 It hence provides:
-- [`isinstancex`](#isinstancex) and [`issubclassx`](#issubclassx): like `isinstance` and `issubclass` but with `typing` types and extra types provided by this library
+- [`isinstancex`](#isinstancex) and [`issubclassx`](#issubclassx-warning-still-in-wip): like `isinstance` and `issubclass` but with `typing` types and extra types provided by this library
   
-  :warning: using a tuple as second parameter will validate against `Tuplex`. If you want to check against multiple types `(int, str)`, wrap it into `Union[(int, str)]`
-- `get_args` and `get_origin` that have the exact same behaviour as the `3.10` python version ones, no matter which python version is used
+  :warning: using a tuple as second parameter will validate against `Tuplex`. If you want to check against multiple types `(int, str)`, wrap it into `Union[(int, str)]`!
+- `get_args` and `get_origin` that have the exact same behaviour as the `typing` module with python 3.10, no matter which python version is used!
 - `is_literal`, `is_newtype`, `is_typeddict` helpers
 - most `typing` types but with homogeneous behaviour (e.g. with `3.8`, this libray will choose `typing_extensions.TypedDict` instead of `typing.TypedDict` since the latter doesn't store information to distinguish optional and required keys)
 - extanded types:
