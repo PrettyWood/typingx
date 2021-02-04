@@ -137,6 +137,8 @@ assert isinstancex({"a", "b"}, Set[str]) is True
 assert isinstancex({"a", "b"}, Set[int]) is False
 
 # Tuple
+assert isinstancex((), Tuple[()]) is True
+assert isinstancex((1,), Tuple[()]) is True
 assert isinstancex((1, 2), Tuple[int, ...]) is True
 assert isinstancex((1, 2), Tuple[int, int]) is True
 assert isinstancex((1, 2), Tuple[int, int, int]) is False
