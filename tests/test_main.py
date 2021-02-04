@@ -98,6 +98,8 @@ def test_isinstancex_dict(obj, tp, expected):
         ([3, 4, "1", 2], List[int], False),
         ([3, 4, 1.1, 2], List[float], False),
         ((3, 4), List[int], False),
+        ([], List[Any], True),
+        ([], list, True),
     ],
 )
 def test_isinstancex_list(obj, tp, expected):
@@ -134,6 +136,9 @@ def test_isinstancex_set(obj, tp, expected):
         ((3,), Tuple[str], False),
         ((3,), Tuple[int, str], False),
         ([3], Tuple[int], False),
+        ((), Tuple[()], True),
+        ((), Tuple[Any, ...], True),
+        ((), tuple, True),
     ],
 )
 def test_isinstancex_tuple(obj, tp, expected):
@@ -350,6 +355,10 @@ def test_isinstancex_callable_missing_everything():
         (["pika", "chu"], Sequence[str], True),
         (("pika", "chu"), Sequence[str], True),
         (("pika", "chu"), Sequence[int], False),
+        ([], Sequence, True),
+        ([], Sequence[Any], True),
+        ("", Sequence, True),
+        ((), Sequence[int], True),
     ],
 )
 def test_isinstancex_sequence(obj, tp, expected):

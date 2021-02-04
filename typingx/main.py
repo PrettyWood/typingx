@@ -209,6 +209,9 @@ def _is_valid_sequence(obj: Any, tp: TypeLike, *, is_list: bool) -> bool:
     Check that a sequence respects a type with args like [str], [str, int], [str, ...]
     but also args like [str, int, ...] or even [str, int, ..., bool, ..., float]
     """
+    if len(obj) == 0:
+        return True
+
     expected_types = get_args(tp) or (Any, ...)
 
     # We consider expected types of `List[int]` as [int, ...]
