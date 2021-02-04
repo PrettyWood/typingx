@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "typingx"
-version = "0.5.0"
+version = "0.5.1"
 description = "Extend typing package functionalities"
 authors = ["Eric Jolibois <em.jolibois@gmail.com>"]
 license = "MIT"
