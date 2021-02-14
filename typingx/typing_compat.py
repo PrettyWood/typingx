@@ -35,7 +35,8 @@ if sys.version_info >= (3, 9):
 elif sys.version_info[:2] == (3, 8):
 
     def T_get_args(tp: TypeLike) -> T.Tuple[T.Any, ...]:
-        if tp is T.Callable:  # fallback since it fails on MacOS
+        # fallback for plain `Callable`, `Dict`, ... since it fails on MacOS
+        if tp in T.__dict__.values():
             return ()
         return T.get_args(tp)
 
