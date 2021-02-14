@@ -21,6 +21,7 @@ __all__ = (
     # typing, typing_extensions or own backport
     "Any",
     "Callable",
+    "Collection",
     "Dict",
     "FrozenSet",
     "Generic",

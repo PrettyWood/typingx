@@ -5,6 +5,7 @@ import pytest
 from typingx import (
     Any,
     Callable,
+    Collection,
     Dict,
     FrozenSet,
     Generic,
@@ -83,6 +84,21 @@ class StrangePair(Generic[T, S]):
         (Callable[[], T][int], ([], int)),
         (Callable[[T], T][int], ([int], int)),
         (Callable[[T, float], U][int, str], ([int, float], str)),
+        (List[Collection[T]][int], (Collection[int],)),
+        (
+            Mapping[T, Sequence[U]][str, int],
+            (
+                str,
+                Sequence[int],
+            ),
+        ),
+        (
+            Mapping[str, Mapping[T, Collection[U]]][float, int],
+            (
+                str,
+                Mapping[float, Collection[int]],
+            ),
+        ),
     ],
 )
 def test_get_args(tp, expected_args):
