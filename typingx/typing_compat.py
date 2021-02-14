@@ -57,6 +57,17 @@ elif sys.version_info[:2] == (3, 7):
 
 else:
 
+    def _replace_typevar_by_resolved(tp: T.Any, typevar_mapping: T.Dict[T.Any, T.Any]) -> T.Any:
+        args = getattr(tp, "__args__", ())
+        # Check if `tp` is itself generic
+        if args:
+            # we don't use `get_origin` to keep `typing` type and not `collections.abc` one
+            origin = getattr(tp, "__origin__", None)
+            new_args = tuple(_replace_typevar_by_resolved(t, typevar_mapping) for t in args)
+            return origin[new_args]
+        else:
+            return typevar_mapping.get(tp, tp)
+
     def T_get_args(tp: TypeLike) -> T.Tuple[T.Any, ...]:
         args = getattr(tp, "__args__", ())
         origin = getattr(tp, "__origin__", None)
@@ -67,8 +78,8 @@ else:
         if origin_parameters and origin_args:
             # in this case `args` contains only the types of generic parameters (e.g. `(float,)`)
             # and `origin_parameters` contain the generic typevars (e.g. `(~T,)`)
-            generic_to_resolved = {typevar: tp for typevar, tp in zip(origin_parameters, args)}
-            args = tuple(generic_to_resolved.get(tp, tp) for tp in origin_args)
+            typevar_mapping = {typevar: tp for typevar, tp in zip(origin_parameters, args)}
+            args = tuple(_replace_typevar_by_resolved(tp, typevar_mapping) for tp in origin_args)
 
         if getattr(origin, "_gorg", None) is T.Callable and args and args[0] is not Ellipsis:
             args = (list(args[:-1]), args[-1])
