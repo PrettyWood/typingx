@@ -117,6 +117,7 @@ else:
         # is `List` and not `list`. We hence need an explicit mapping...
         typing_to_builtin_map = {
             T.Callable: collections.abc.Callable,
+            T.Collection: collections.abc.Collection,
             T.Dict: dict,
             T.FrozenSet: frozenset,
             T.List: list,

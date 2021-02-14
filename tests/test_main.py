@@ -6,6 +6,7 @@ import pytest
 from typingx import (
     Any,
     Callable,
+    Collection,
     Dict,
     List,
     Listx,
@@ -345,6 +346,21 @@ def test_isinstancex_callable_missing_everything():
         assert isinstancex(no_everything, Callable[[Any, Any], Any]) is True
         assert isinstancex(no_everything, Callable[[Any], Any]) is False
         assert isinstancex(no_everything, Callable[[Any, Any, Any], Any]) is False
+
+
+@pytest.mark.parametrize(
+    "obj,tp,expected",
+    [
+        (1, Collection[str], False),
+        ([1, "str"], Collection, True),
+        ({"pika", "chu"}, Collection[str], True),
+        (("pika", "chu"), Collection[str], True),
+        ({"pika", "chu"}, Collection[int], False),
+    ],
+)
+def test_isinstancex_collection(obj, tp, expected):
+    """It should support `Collection`"""
+    assert isinstancex(obj, tp) is expected
 
 
 @pytest.mark.parametrize(

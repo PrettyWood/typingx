@@ -126,6 +126,10 @@ def _isinstancex(obj: Any, tp: TypeLike) -> bool:
         values_to_check = get_args(obj) if is_literal(obj) else (obj,)
         return all(v in get_args(tp) for v in values_to_check)
 
+    # e.g. Collection[int]
+    elif origin is collections.abc.Collection:
+        return _is_valid_sequence(obj, tp, is_list=True)
+
     # e.g. Sequence[int]
     elif origin is collections.abc.Sequence:
         return _is_valid_sequence(obj, tp, is_list=True)

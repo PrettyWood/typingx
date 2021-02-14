@@ -138,6 +138,8 @@ def test_get_args(tp, expected_args):
         (Callable, collections.abc.Callable),
         (Callable[..., str], collections.abc.Callable),
         (Callable[[int], str], collections.abc.Callable),
+        (Collection, collections.abc.Collection),
+        (Collection[int], collections.abc.Collection),
     ],
 )
 def test_get_origin(tp, expected_origin):
