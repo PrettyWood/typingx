@@ -133,6 +133,7 @@ def test_get_args(tp, expected_args):
         (Generic, Generic),
         (Generic[T], Generic),
         (Union[T, int], Union),
+        (Union[T, int][str], Union),
         (List[Tuple[T, T]][int], list),
         (StrangePair[int, str], StrangePair),
         (Callable, collections.abc.Callable),

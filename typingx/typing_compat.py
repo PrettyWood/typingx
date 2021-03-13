@@ -128,10 +128,11 @@ else:
             T.Type: type,
         }
 
-        if hasattr(tp, "_gorg"):
-            origin = tp._gorg
-        else:
-            origin = getattr(tp, "__origin__", None)
+        origin = getattr(tp, "_gorg", getattr(tp, "__origin__", None))
+
+        while getattr(origin, "__args__", None):
+            origin = T_get_origin(origin)
+
         return typing_to_builtin_map.get(origin, origin)
 
 
