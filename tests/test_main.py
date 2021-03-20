@@ -450,6 +450,9 @@ Mult1_5AndLe2 = Annotated[Union[int, float], Constraints(multiple_of=1.5, le=10)
 OneLowerStr = Annotated[str, Constraints(regex="^[a-z]$")]
 OneDigitUInt = Annotated[int, Constraints(ge=0, lt=10)]
 Str2to5 = Annotated[str, Constraints(min_length=2, max_length=5)]
+Ge2Le5 = Annotated[int, Constraints(ge=2, le=5)]
+Lt4 = Annotated[int, Constraints(lt=4)]
+Len3_5 = Constraints(min_length=3, max_length=5)
 
 
 @pytest.mark.parametrize(
@@ -473,6 +476,14 @@ Str2to5 = Annotated[str, Constraints(min_length=2, max_length=5)]
         ([3.0, 4], List[Mult1_5AndLe2], False),
         ({"a": 1, "b": 2}, Dict[OneLowerStr, OneDigitUInt], True),
         ({"a": 1, "bc": 2}, Dict[OneLowerStr, OneDigitUInt], False),
+        ([3, 3], Annotated[List[Ge2Le5], Len3_5], False),
+        ([3, 3, 3], Annotated[List[Between2And5], Len3_5], True),
+        ([3, 3, 3, 3, 3], Annotated[List[Between2And5], Len3_5], True),
+        ([3, 1, 3, 3, 3], Annotated[List[Between2And5], Len3_5], False),
+        ([3, 3, 3, 3, 3, 3], Annotated[List[Between2And5], Len3_5], False),
+        ({3, 1, 3, 3, 3}, Annotated[Set[Lt4], Len3_5], False),  # only 2 distincts
+        ({3, 2, 6, 3, 3}, Annotated[Set[Lt4], Len3_5], False),  # not all under 4
+        ({3, 1, 2, 1, 3}, Annotated[Set[Lt4], Len3_5], True),
     ],
 )
 def test_isinstancex_constraints(obj, tp, expected):

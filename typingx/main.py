@@ -159,7 +159,7 @@ def _isinstancex(obj: Any, tp: TypeLike, constraints: Optional[Constraints] = No
 
         # We consider Listx[int] to check if a list as ONLY ONE item
         return isinstancex(obj, list, constraints=constraints) and _is_valid_sequence(
-            obj, tp, constraints, is_list=name != "Listx"
+            obj, tp, is_list=name != "Listx"
         )
 
     # e.g. Set[str]
@@ -169,12 +169,14 @@ def _isinstancex(obj: Any, tp: TypeLike, constraints: Optional[Constraints] = No
             tp = Set[Any]
 
         return isinstancex(obj, set, constraints=constraints) and all(
-            isinstancex(x, Union[get_args(tp)], constraints=constraints) for x in obj
+            isinstancex(x, Union[get_args(tp)]) for x in obj
         )
 
     # e.g. Tuple[int, ...] or Tuplex[int, str, ...]
     elif origin is tuple:
-        return isinstance(obj, tuple) and _is_valid_sequence(obj, tp, constraints, is_list=False)
+        return isinstancex(obj, tuple, constraints=constraints) and _is_valid_sequence(
+            obj, tp, is_list=False
+        )
 
     # e.g. Type[int]
     elif origin is type:
@@ -192,11 +194,15 @@ def _isinstancex(obj: Any, tp: TypeLike, constraints: Optional[Constraints] = No
 
     # e.g. Collection[int]
     elif origin is collections.abc.Collection:
-        return _is_valid_sequence(obj, tp, constraints, is_list=True)
+        return _is_valid_sequence(obj, tp, is_list=True) and (
+            constraints is None or constraints.is_valid(obj)
+        )
 
     # e.g. Sequence[int]
     elif origin is collections.abc.Sequence:
-        return _is_valid_sequence(obj, tp, constraints, is_list=True)
+        return _is_valid_sequence(obj, tp, is_list=True) and (
+            constraints is None or constraints.is_valid(obj)
+        )
 
     # e.g. Maping[str, int]
     elif origin is collections.abc.Mapping:
@@ -258,9 +264,7 @@ def _is_valid_mapping(obj: Any, tp: TypeLike, constraints: Optional[Constraints]
     )
 
 
-def _is_valid_sequence(
-    obj: Any, tp: TypeLike, constraints: Optional[Constraints], *, is_list: bool
-) -> bool:
+def _is_valid_sequence(obj: Any, tp: TypeLike, *, is_list: bool) -> bool:
     """
     Check that a sequence respects a type with args like [str], [str, int], [str, ...]
     but also args like [str, int, ...] or even [str, int, ..., bool, ..., float]
@@ -280,15 +284,15 @@ def _is_valid_sequence(
         try:
             if expected_types[current_index] is ...:
                 # Check first with previous type...
-                if isinstancex(item, expected_types[current_index - 1], constraints=constraints):
+                if isinstancex(item, expected_types[current_index - 1]):
                     continue
 
                 # ...else check with a new type
-                if isinstancex(item, expected_types[current_index + 1], constraints=constraints):
+                if isinstancex(item, expected_types[current_index + 1]):
                     current_index += 2
                     continue
             else:
-                if isinstancex(item, expected_types[current_index], constraints=constraints):
+                if isinstancex(item, expected_types[current_index]):
                     current_index += 1
                     continue
         except IndexError:
