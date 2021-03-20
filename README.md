@@ -23,7 +23,11 @@ isinstancex(x, str | int)  # or typing.Union[str, int]
 isinstancex(my_list, list[int])  # or typing.List[int]
 
 # Check if `my_list` has only numbers
-isinstancex(my_list, list[int | float])  # or typing.List[typing.Union[int, float]]
+isinstancex(my_list, list[int | float])
+
+# Check if `my_set` has only integers greater than 2 with at least 3 distinct ones
+Gt2Int = Annotated[int, Constraints(gt=2)]
+isinstancex(my_set, Annotated[set[Gt2Int], Constraints(min_length=3)])  # or `typing.Set`
 
 # Check if `my_list` is a list starting with 2 integers and then has only strings
 isinstancex(my_list, [int, int, str, ...])  # shortcut for `Listx[int, int, str, ...]` (see extra types)
@@ -36,6 +40,11 @@ isinstancex(my_dict, dict[int, str])  # or `typing.Dict[int, str]`
 
 # Check deeper the shape of `my_dict`
 isinstancex(my_dict, {'a': int, 'b': bool, ...: str})  # shortcut for `typing.TypedDict('TD', {'a': int, 'b': bool, __extra__: str})`
+
+# Check if all the keys are 1 lower case letter and values are integers with 1 digit
+OneLowerStr = Annotated[str, Constraints(regex='^[a-z]$')]
+OneDigitUInt = Annotated[int, Constraints(ge=0, lt=10)]
+isinstancex(my_dict, dict[OneLowerStr, OneDigitUInt])
 ```
 
 Since `typing` changed a lot since python `3.6`, this library also makes sure the whole behaviour
@@ -67,6 +76,32 @@ from collections import ChainMap, Counter
 from typingx import *
 
 T, U = TypeVar('T'), TypeVar('U')
+
+# Annotated
+GT2 = Annotated[int, Constraints(gt=2)]
+assert isinstancex(1, int) is True
+assert isinstancex(1, GT2) is False
+assert isinstancex(3, GT2) is True
+assert isinstancex([3, 3], list[GT2]) is True
+
+Between2And5 = Annotated[Union[float, int], Constraints(ge=2, le=5)]
+assert isinstancex(3, Between2And5) is True
+assert isinstancex(3.5, Between2And5) is True
+assert isinstancex('3.5', Between2And5) is False
+
+assert isinstancex(3, Annotated[int, Constraints(multiple_of=1.5)]) is True
+assert isinstancex(3., Annotated[int, Constraints(multiple_of=1.5)]) is False
+assert isinstancex(3., Annotated[Union[int, float], Constraints(multiple_of=1.5)]) is True
+
+Mult1_5AndLe2 = Annotated[Union[int, float], Constraints(multiple_of=1.5, le=10)]
+assert isinstancex(15, Mult1_5AndLe2) is False
+assert isinstancex([3.0, 4.5, 9], list[Mult1_5AndLe2]) is True
+assert isinstancex([3., 4.3], list[Mult1_5AndLe2]) is False
+
+OneLowerStr = Annotated[str, Constraints(regex='^[a-z]$')]
+OneDigitUInt = Annotated[int, Constraints(ge=0, lt=10)]
+assert isinstancex({'a': 1, 'b': 2}, dict[OneLowerStr, OneDigitUInt]) is True
+assert isinstancex({'a': 1, 'bc': 2}, dict[OneLowerStr, OneDigitUInt]) is False
 
 # Callable
 def f(x: int, y: float) -> str:
