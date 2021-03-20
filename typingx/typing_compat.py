@@ -7,6 +7,7 @@ import sys
 import typing as T
 
 __all__ = (
+    "Annotated",
     "Literal",
     "NoneType",
     "OneOrManyTypes",
@@ -16,6 +17,7 @@ __all__ = (
     "get_origin",
     "get_type_hints",
     "is_literal",
+    "is_annotated",
     "is_newtype",
     "is_typeddict",
 )
@@ -38,7 +40,10 @@ elif sys.version_info[:2] == (3, 8):
         # fallback for plain `Callable`, `Dict`, ... since it fails on MacOS
         if tp in T.__dict__.values():
             return ()
-        return T.get_args(tp)
+        elif is_annotated(tp):
+            return T.get_args(tp) + T.cast(T.Tuple[T.Any, ...], tp.__metadata__)
+        else:
+            return T.get_args(tp)
 
 
 elif sys.version_info[:2] == (3, 7):
@@ -52,7 +57,10 @@ elif sys.version_info[:2] == (3, 7):
         if origin is collections.abc.Callable and args and args[0] is not Ellipsis:
             return (list(args[:-1]), args[-1])
 
-        return args
+        if is_annotated(tp):
+            return args + T.cast(T.Tuple[T.Any, ...], tp.__metadata__)
+        else:
+            return args
 
 
 else:
@@ -84,6 +92,9 @@ else:
         if getattr(origin, "_gorg", None) is T.Callable and args and args[0] is not Ellipsis:
             args = (list(args[:-1]), args[-1])
 
+        if is_annotated(tp):
+            args = (args[0], *args[1])
+
         return args
 
 
@@ -91,7 +102,7 @@ def get_args(tp: TypeLike) -> T.Tuple[T.Any, ...]:
     if sys.version_info >= (3, 10):
         return T_get_args(tp)
     else:
-        # Handle nested literals (see https://www.python.org/dev/peps/pep-0586)
+        # Handle nested literals for 3.6 to 3.9 (see https://www.python.org/dev/peps/pep-0586)
         if is_literal(tp):
             return _get_all_literal_values(tp)
 
@@ -137,8 +148,16 @@ else:
 
 
 def get_origin(tp: TypeLike) -> T.Optional[TypeLike]:
-    # Python 3.8+
-    if sys.version_info >= (3, 8):
+    # Python 3.9+
+    if sys.version_info >= (3, 9):
+        return T_get_origin(tp)
+
+    # Support `Annotated` for 3.6 to 3.8
+    elif is_annotated(tp):
+        return Annotated
+
+    # Python 3.8
+    elif sys.version_info >= (3, 8):
         return T_get_origin(tp)
 
     # Python 3.7
@@ -266,3 +285,21 @@ def is_newtype(tp: TypeLike) -> bool:
     Check if a type is a `NewType`
     """
     return tp.__class__ is TestType.__class__
+
+
+#######################################
+# Annotated
+#######################################
+try:
+    Annotated = T.Annotated
+except AttributeError:
+    from typing_extensions import Annotated  # type: ignore[misc]
+
+AnnotatedOne = Annotated[int, 1]
+
+
+def is_annotated(tp: TypeLike) -> bool:
+    """
+    Check if a type is a `Annotated`
+    """
+    return tp.__class__ is AnnotatedOne.__class__

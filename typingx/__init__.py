@@ -1,9 +1,10 @@
 # flake8: noqa
 from typing import *
 
-from .main import isinstancex, issubclassx
+from .main import Constraints, isinstancex, issubclassx
 from .types import Listx, Tuplex
 from .typing_compat import (
+    Annotated,
     Literal,
     NoneType,
     TypedDict,
@@ -15,10 +16,12 @@ from .typing_compat import (
 )
 
 __all__ = (
-    # main methods
+    # main
+    "Constraints",
     "isinstancex",
     "issubclassx",
     # typing, typing_extensions or own backport
+    "Annotated",
     "Any",
     "Callable",
     "Collection",

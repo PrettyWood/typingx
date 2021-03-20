@@ -4,9 +4,11 @@ from collections import ChainMap, Counter
 import pytest
 
 from typingx import (
+    Annotated,
     Any,
     Callable,
     Collection,
+    Constraints,
     Dict,
     List,
     Listx,
@@ -439,6 +441,34 @@ Number = Union[int, float]
 )
 def test_isinstancex_mix(obj, tp, expected):
     """It should support a mix of all those types"""
+    assert isinstancex(obj, tp) is expected
+
+
+GT2 = Annotated[int, Constraints(gt=2)]
+Between2And5 = Annotated[Union[float, int], Constraints(ge=2, le=5)]
+Mult1_5AndLe2 = Annotated[Union[int, float], Constraints(multiple_of=1.5, le=10)]
+
+
+@pytest.mark.parametrize(
+    "obj,tp,expected",
+    [
+        (1, int, True),
+        (1, GT2, False),
+        (3, GT2, True),
+        ([3, 3], List[GT2], True),
+        (3, Between2And5, True),
+        (3.5, Between2And5, True),
+        ("3.5", Between2And5, False),
+        (3, Annotated[int, Constraints(multiple_of=1.5)], True),
+        (3.0, Annotated[int, Constraints(multiple_of=1.5)], False),
+        (3.0, Annotated[Union[int, float], Constraints(multiple_of=1.5)], True),
+        (15, Mult1_5AndLe2, False),
+        ([3.0, 4.5, 9], List[Mult1_5AndLe2], True),
+        ([3.0, 4], List[Mult1_5AndLe2], False),
+    ],
+)
+def test_isinstancex_constraints(obj, tp, expected):
+    """It should support constraints on values"""
     assert isinstancex(obj, tp) is expected
 
 

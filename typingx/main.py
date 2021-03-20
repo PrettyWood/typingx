@@ -1,9 +1,11 @@
 import collections.abc
 import sys
-from typing import Any, Callable, Dict, List, Set, Tuple, Union, cast
+from dataclasses import dataclass
+from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union, cast
 
 from .types import Listx, Tuplex
 from .typing_compat import (
+    Annotated,
     Literal,
     NoneType,
     OneOrManyTypes,
@@ -17,7 +19,7 @@ from .typing_compat import (
     is_typeddict,
 )
 
-__all__ = ("isinstancex", "issubclassx")
+__all__ = ("Constraints", "isinstancex", "issubclassx")
 
 TYPED_DICT_EXTRA_KEY = "__extra__"
 NONE_TYPES = {None, NoneType, Literal[None]}
@@ -29,8 +31,51 @@ else:
     UNION_TYPES = {Union, types.Union}
 
 
-def _isinstancex(obj: Any, tp: TypeLike) -> bool:
+@dataclass(frozen=True)
+class Constraints:
+    ge: Optional[float] = None
+    gt: Optional[float] = None
+    le: Optional[float] = None
+    lt: Optional[float] = None
+    multiple_of: Optional[float] = None
+
+    def is_valid(self, v: Any) -> bool:
+        if self.ge is not None and v < self.ge:
+            return False
+        if self.gt is not None and v <= self.gt:
+            return False
+        if self.le is not None and v > self.le:
+            return False
+        if self.lt is not None and v >= self.lt:
+            return False
+        if self.multiple_of is not None and v % self.multiple_of != 0:
+            return False
+
+        return True
+
+
+def isinstancex(obj: Any, tp: OneOrManyTypes, *, constraints: Optional[Constraints] = None) -> bool:
+    try:
+        return _isinstancex(obj, tp, constraints)
+    except (AttributeError, TypeError):
+        return False
+
+
+def issubclassx(obj: Any, tp: OneOrManyTypes) -> bool:
+    try:
+        return _issubclassx(obj, tp)
+    except (AttributeError, TypeError):
+        return False
+
+
+def _isinstancex(obj: Any, tp: TypeLike, constraints: Optional[Constraints] = None) -> bool:
     """Extend `isinstance` with `typing` types"""
+    origin = get_origin(tp)
+
+    if origin is Annotated:
+        tp, constraints = get_args(tp)
+        origin = get_origin(tp)
+
     if tp is Any:
         return True
 
@@ -41,8 +86,6 @@ def _isinstancex(obj: Any, tp: TypeLike) -> bool:
     if obj is None and tp in NONE_TYPES:
         return True
 
-    origin = get_origin(tp)
-
     # convert
     # - a plain dictionary to Dict or TypedDict
     # - a plain list to Listx[...]
@@ -51,15 +94,16 @@ def _isinstancex(obj: Any, tp: TypeLike) -> bool:
         # tp is of form `{'a': TypeLike, ...}`, `{...: TypeLike}`
         if isinstance(tp, dict):
             tp = {(TYPED_DICT_EXTRA_KEY if k is ... else k): v for k, v in tp.items()}
-            return isinstancex(obj, TypedDict("_TypedDict", tp))  # type: ignore
+            td = TypedDict("_TypedDict", tp)  # type: ignore[call-overload]
+            return isinstancex(obj, td, constraints=constraints)
         elif isinstance(tp, list):
-            return isinstancex(obj, Listx[tuple(tp)])
+            return isinstancex(obj, Listx[tuple(tp)], constraints=constraints)
         elif isinstance(tp, tuple):
-            return isinstancex(obj, Tuplex[tuple(tp)])
+            return isinstancex(obj, Tuplex[tuple(tp)], constraints=constraints)
 
     # e.g. Union[str, int] (or str|int in 3.10)
     if origin in UNION_TYPES:
-        return any(isinstancex(obj, arg) for arg in get_args(tp))
+        return any(isinstancex(obj, arg, constraints=constraints) for arg in get_args(tp))
 
     # e.g. Callable[[int], str]
     elif origin is collections.abc.Callable:
@@ -87,7 +131,9 @@ def _isinstancex(obj: Any, tp: TypeLike) -> bool:
     elif origin is dict:
         if tp is Dict:
             tp = Dict[Any, Any]
-        return isinstancex(obj, dict) and _is_valid_mapping(obj, tp)
+        return isinstancex(obj, dict, constraints=constraints) and _is_valid_mapping(
+            obj, tp, constraints
+        )
 
     # e.g. List[str] or Listx[int, str, ...]
     elif origin is list:
@@ -98,7 +144,9 @@ def _isinstancex(obj: Any, tp: TypeLike) -> bool:
         name = getattr(tp, "_name", None) or getattr(tp, "__name__", None)
 
         # We consider Listx[int] to check if a list as ONLY ONE item
-        return isinstancex(obj, list) and _is_valid_sequence(obj, tp, is_list=name != "Listx")
+        return isinstancex(obj, list, constraints=constraints) and _is_valid_sequence(
+            obj, tp, constraints, is_list=name != "Listx"
+        )
 
     # e.g. Set[str]
     elif origin is set:
@@ -106,11 +154,13 @@ def _isinstancex(obj: Any, tp: TypeLike) -> bool:
         if tp is Set:
             tp = Set[Any]
 
-        return isinstancex(obj, set) and all(isinstancex(x, Union[get_args(tp)]) for x in obj)
+        return isinstancex(obj, set, constraints=constraints) and all(
+            isinstancex(x, Union[get_args(tp)], constraints=constraints) for x in obj
+        )
 
     # e.g. Tuple[int, ...] or Tuplex[int, str, ...]
     elif origin is tuple:
-        return isinstance(obj, tuple) and _is_valid_sequence(obj, tp, is_list=False)
+        return isinstance(obj, tuple) and _is_valid_sequence(obj, tp, constraints, is_list=False)
 
     # e.g. Type[int]
     elif origin is type:
@@ -119,7 +169,7 @@ def _isinstancex(obj: Any, tp: TypeLike) -> bool:
     # e.g. TypedDict('Movie', {'name': str, 'year': int})
     elif is_typeddict(tp):
         tp = cast(TypedDict, tp)
-        return _is_valid_typeddict(obj, tp)
+        return _is_valid_typeddict(obj, tp, constraints)
 
     # e.g. Literal['Pika']
     elif is_literal(tp):
@@ -128,15 +178,15 @@ def _isinstancex(obj: Any, tp: TypeLike) -> bool:
 
     # e.g. Collection[int]
     elif origin is collections.abc.Collection:
-        return _is_valid_sequence(obj, tp, is_list=True)
+        return _is_valid_sequence(obj, tp, constraints, is_list=True)
 
     # e.g. Sequence[int]
     elif origin is collections.abc.Sequence:
-        return _is_valid_sequence(obj, tp, is_list=True)
+        return _is_valid_sequence(obj, tp, constraints, is_list=True)
 
     # e.g. Maping[str, int]
     elif origin is collections.abc.Mapping:
-        return _is_valid_mapping(obj, tp)
+        return _is_valid_mapping(obj, tp, constraints)
 
     # plain `Listx`
     elif tp is Listx:
@@ -146,7 +196,7 @@ def _isinstancex(obj: Any, tp: TypeLike) -> bool:
     elif tp is Tuplex:
         tp = tuple
 
-    return isinstance(obj, tp)
+    return isinstance(obj, tp) and (constraints is None or constraints.is_valid(obj))
 
 
 def _issubclassx(obj: Any, tp: TypeLike) -> bool:
@@ -184,31 +234,19 @@ def _issubclassx(obj: Any, tp: TypeLike) -> bool:
     )
 
 
-def _safe(f: Callable[[Any, TypeLike], bool]) -> Callable[[Any, OneOrManyTypes], bool]:
-    def safe_f(obj: Any, tp: OneOrManyTypes) -> bool:
-        try:
-            return f(obj, tp)
-        except (AttributeError, TypeError):
-            return False
-
-    return safe_f
-
-
-isinstancex = _safe(_isinstancex)
-issubclassx = _safe(_issubclassx)
-
-
 #######################################
 # get_args
 #######################################
-def _is_valid_mapping(obj: Any, tp: TypeLike) -> bool:
+def _is_valid_mapping(obj: Any, tp: TypeLike, constraints: Optional[Constraints]) -> bool:
     keys_type, values_type = get_args(tp)
-    return all(isinstancex(key, keys_type) for key in obj.keys()) and all(
-        isinstancex(value, values_type) for value in obj.values()
+    return all(isinstancex(key, keys_type, constraints=constraints) for key in obj.keys()) and all(
+        isinstancex(value, values_type, constraints=constraints) for value in obj.values()
     )
 
 
-def _is_valid_sequence(obj: Any, tp: TypeLike, *, is_list: bool) -> bool:
+def _is_valid_sequence(
+    obj: Any, tp: TypeLike, constraints: Optional[Constraints], *, is_list: bool
+) -> bool:
     """
     Check that a sequence respects a type with args like [str], [str, int], [str, ...]
     but also args like [str, int, ...] or even [str, int, ..., bool, ..., float]
@@ -228,15 +266,15 @@ def _is_valid_sequence(obj: Any, tp: TypeLike, *, is_list: bool) -> bool:
         try:
             if expected_types[current_index] is ...:
                 # Check first with previous type...
-                if isinstancex(item, expected_types[current_index - 1]):
+                if isinstancex(item, expected_types[current_index - 1], constraints=constraints):
                     continue
 
                 # ...else check with a new type
-                if isinstancex(item, expected_types[current_index + 1]):
+                if isinstancex(item, expected_types[current_index + 1], constraints=constraints):
                     current_index += 2
                     continue
             else:
-                if isinstancex(item, expected_types[current_index]):
+                if isinstancex(item, expected_types[current_index], constraints=constraints):
                     current_index += 1
                     continue
         except IndexError:
@@ -248,7 +286,7 @@ def _is_valid_sequence(obj: Any, tp: TypeLike, *, is_list: bool) -> bool:
         return expected_types[current_index:] in ((), (...,))
 
 
-def _is_valid_typeddict(obj: Any, tp: TypedDict) -> bool:
+def _is_valid_typeddict(obj: Any, tp: TypedDict, constraints: Optional[Constraints]) -> bool:
     # ensure it's a dict that contains all the required keys but extra values are allowed
     resolved_annotations = get_type_hints(tp)
 
@@ -259,10 +297,14 @@ def _is_valid_typeddict(obj: Any, tp: TypedDict) -> bool:
             return False
 
         are_required_keys_valid = all(
-            isinstancex(v, resolved_annotations[k]) for k, v in obj.items() if k in required_keys
+            isinstancex(v, resolved_annotations[k], constraints=constraints)
+            for k, v in obj.items()
+            if k in required_keys
         )
         are_extra_keys_valid = all(
-            isinstancex(v, rest_type) for k, v in obj.items() if k not in required_keys
+            isinstancex(v, rest_type, constraints=constraints)
+            for k, v in obj.items()
+            if k not in required_keys
         )
         return are_required_keys_valid and are_extra_keys_valid
 
@@ -273,7 +315,9 @@ def _is_valid_typeddict(obj: Any, tp: TypedDict) -> bool:
         ):
             return False
 
-        return all(isinstancex(v, resolved_annotations[k]) for k, v in obj.items())
+        return all(
+            isinstancex(v, resolved_annotations[k], constraints=constraints) for k, v in obj.items()
+        )
 
 
 def _get_function_type_hints(obj: Callable[..., Any]) -> Tuple[List[TypeLike], TypeLike]:

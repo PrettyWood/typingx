@@ -3,9 +3,11 @@ import collections
 import pytest
 
 from typingx import (
+    Annotated,
     Any,
     Callable,
     Collection,
+    Constraints,
     Dict,
     FrozenSet,
     Generic,
@@ -99,6 +101,8 @@ class StrangePair(Generic[T, S]):
                 Mapping[float, Collection[int]],
             ),
         ),
+        (Annotated[int, Constraints(ge=4)], (int, Constraints(ge=4))),
+        (Annotated[Union[int, float], Constraints(ge=4)], (Union[int, float], Constraints(ge=4))),
     ],
 )
 def test_get_args(tp, expected_args):
@@ -141,6 +145,8 @@ def test_get_args(tp, expected_args):
         (Callable[[int], str], collections.abc.Callable),
         (Collection, collections.abc.Collection),
         (Collection[int], collections.abc.Collection),
+        (Annotated[int, Constraints(ge=4)], Annotated),
+        (Annotated[Union[int, float], Constraints(ge=4)], Annotated),
     ],
 )
 def test_get_origin(tp, expected_origin):
