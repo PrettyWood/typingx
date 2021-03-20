@@ -39,6 +39,10 @@ class Constraints:
     lt: Optional[float] = None
     multiple_of: Optional[float] = None
 
+    min_length: Optional[int] = None
+    max_length: Optional[int] = None
+    regex: Optional[str] = None
+
     def is_valid(self, v: Any) -> bool:
         if self.ge is not None and v < self.ge:
             return False
@@ -50,6 +54,16 @@ class Constraints:
             return False
         if self.multiple_of is not None and v % self.multiple_of != 0:
             return False
+
+        if self.min_length is not None and len(v) < self.min_length:
+            return False
+        if self.max_length is not None and len(v) > self.max_length:
+            return False
+        if self.regex is not None:
+            import re
+
+            if re.search(self.regex, v) is None:
+                return False
 
         return True
 

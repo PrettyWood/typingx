@@ -447,6 +447,9 @@ def test_isinstancex_mix(obj, tp, expected):
 GT2 = Annotated[int, Constraints(gt=2)]
 Between2And5 = Annotated[Union[float, int], Constraints(ge=2, le=5)]
 Mult1_5AndLe2 = Annotated[Union[int, float], Constraints(multiple_of=1.5, le=10)]
+OneLowerStr = Annotated[str, Constraints(regex="^[a-z]$")]
+OneDigitUInt = Annotated[int, Constraints(ge=0, lt=10)]
+Str2to5 = Annotated[str, Constraints(min_length=2, max_length=5)]
 
 
 @pytest.mark.parametrize(
@@ -459,12 +462,17 @@ Mult1_5AndLe2 = Annotated[Union[int, float], Constraints(multiple_of=1.5, le=10)
         (3, Between2And5, True),
         (3.5, Between2And5, True),
         ("3.5", Between2And5, False),
+        ("qw", Str2to5, True),
+        ("qwert", Str2to5, True),
+        ("qwerty", Str2to5, False),
         (3, Annotated[int, Constraints(multiple_of=1.5)], True),
         (3.0, Annotated[int, Constraints(multiple_of=1.5)], False),
         (3.0, Annotated[Union[int, float], Constraints(multiple_of=1.5)], True),
         (15, Mult1_5AndLe2, False),
         ([3.0, 4.5, 9], List[Mult1_5AndLe2], True),
         ([3.0, 4], List[Mult1_5AndLe2], False),
+        ({"a": 1, "b": 2}, Dict[OneLowerStr, OneDigitUInt], True),
+        ({"a": 1, "bc": 2}, Dict[OneLowerStr, OneDigitUInt], False),
     ],
 )
 def test_isinstancex_constraints(obj, tp, expected):
