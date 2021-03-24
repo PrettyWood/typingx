@@ -31,16 +31,20 @@ else:
     UNION_TYPES = {Union, types.Union}
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class Constraints:
+    # int, float, ...
     ge: Optional[float] = None
     gt: Optional[float] = None
     le: Optional[float] = None
     lt: Optional[float] = None
     multiple_of: Optional[float] = None
 
+    # sequences-like (str, list, ...)
     min_length: Optional[int] = None
     max_length: Optional[int] = None
+
+    # str
     regex: Optional[str] = None
 
     def is_valid(self, v: Any) -> bool:
@@ -66,6 +70,10 @@ class Constraints:
                 return False
 
         return True
+
+    def __repr__(self) -> str:
+        defined_fields = (f"{k}={v}" for k, v in self.__dict__.items() if v is not None)
+        return f"Constraints({', '.join(defined_fields)})"
 
 
 def isinstancex(obj: Any, tp: OneOrManyTypes, *, constraints: Optional[Constraints] = None) -> bool:

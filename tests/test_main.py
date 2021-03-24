@@ -522,3 +522,7 @@ def test_isinstancex_constraints(obj, tp, expected):
 def test_issubclassx(obj, tp, expected):
     """It should support union in subclass"""
     assert issubclassx(obj, tp) is expected
+
+
+def test_repr_constraints():
+    assert repr(Constraints(ge=3, le=5)) == "Constraints(ge=3, le=5)"
