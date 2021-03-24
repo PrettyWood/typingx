@@ -12,15 +12,10 @@ With this library, you can leverage `typing` types at runtime to do that!
 _This is even more powerful when used with generic standard collections (e.g. `list[str]`) introduced in python 3.9 and new union operator `|`
 introduced in python 3.10. If you want to use them with older version, a backport [future-typing](https://github.com/PrettyWood/future-typing) exists!_
 
+### Example
 ```python
-# Check if `x` is a string
-isinstancex(x, str)
-
 # Check if `x` is a string or an integer
-isinstancex(x, str | int)  # or typing.Union[str, int]
-
-# Check if `my_list` is a list of integers
-isinstancex(my_list, list[int])  # or typing.List[int]
+isinstancex(x, str | int)
 
 # Check if `my_list` has only numbers
 isinstancex(my_list, list[int | float])
@@ -29,15 +24,6 @@ isinstancex(my_list, list[int | float])
 Gt2Int = Annotated[int, Constraints(gt=2)]
 isinstancex(my_set, Annotated[set[Gt2Int], Constraints(min_length=3)])  # or `typing.Set`
 
-# Check if `my_list` is a list starting with 2 integers and then has only strings
-isinstancex(my_list, [int, int, str, ...])  # shortcut for `Listx[int, int, str, ...]` (see extra types)
-
-# Check if `my_tuple` is a tuple starting with only integers and then only floats
-isinstancex(my_tuple, (int, ..., float, ...))  # shortcut for `Tuplex[int, ..., float, ...]` (see extra types)
-
-# Check if `my_dict` is a mapping between integers and strings
-isinstancex(my_dict, dict[int, str])  # or `typing.Dict[int, str]`
-
 # Check deeper the shape of `my_dict`
 isinstancex(my_dict, {'a': int, 'b': bool, ...: str})  # shortcut for `typing.TypedDict('TD', {'a': int, 'b': bool, __extra__: str})`
 
@@ -45,15 +31,31 @@ isinstancex(my_dict, {'a': int, 'b': bool, ...: str})  # shortcut for `typing.Ty
 OneLowerStr = Annotated[str, Constraints(regex='^[a-z]$')]
 OneDigitUInt = Annotated[int, Constraints(ge=0, lt=10)]
 isinstancex(my_dict, dict[OneLowerStr, OneDigitUInt])
+
+@func_check
+def my_func(a: int, b: Annotated[int, Constraints(ge=5)]) -> Annotated[int, Constraints(le=10)]:
+    return a + b
+
+try:
+    my_func(1, 4)
+except TypeError as e:
+    assert str(e) == "Input b (value: 4) is not a valid Annotated[int, Constraints(ge=5)]"
+
+try:
+    my_func(5, 6)
+except TypeError as e:
+    assert str(e) == "Output (value: 11) is not a valid Annotated[int, Constraints(le=10)]"
 ```
 
 Since `typing` changed a lot since python `3.6`, this library also makes sure the whole behaviour
 is consistent with `3.10` for all python versions.
 
 It hence provides:
-- [`isinstancex`](#isinstancex) and [`issubclassx`](#issubclassx-warning-still-in-wip): like `isinstance` and `issubclass` but with `typing` types and extra types provided by this library
+- [`isinstancex`](#isinstancex): like `isinstance` and `issubclass` but with `typing` types and extra types provided by this library
   
   :warning: using a tuple as second parameter will validate against `Tuplex`. If you want to check against multiple types `(int, str)`, wrap it into `Union[(int, str)]`!
+- [`issubclassx`](#issubclassx-warning-still-in-wip): same as `isinstancex` but for `issubclass`
+- `func_check`: a decorator to check inputs and output of a function based on annotation
 - `get_args` and `get_origin` that have the exact same behaviour as the `typing` module with python 3.10, no matter which python version is used!
 - `is_literal`, `is_newtype`, `is_typeddict` helpers
 - most `typing` types but with homogeneous behaviour (e.g. with `3.8`, this libray will choose `typing_extensions.TypedDict` instead of `typing.TypedDict` since the latter doesn't store information to distinguish optional and required keys)
