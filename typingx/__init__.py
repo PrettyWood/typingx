@@ -1,6 +1,7 @@
 # flake8: noqa
 from typing import *
 
+from .func_check import func_check
 from .main import Constraints, isinstancex, issubclassx
 from .types import Listx, Tuplex
 from .typing_compat import (
@@ -22,6 +23,8 @@ __all__ = (
     "Constraints",
     "isinstancex",
     "issubclassx",
+    # func_check
+    "func_check",
     # typing, typing_extensions or own backport
     "Annotated",
     "Any",
