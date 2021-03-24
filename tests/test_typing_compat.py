@@ -32,6 +32,7 @@ from typingx import (
     is_newtype,
     is_typeddict,
 )
+from typingx.typing_compat import display_type
 
 
 class FullMovie(TypedDict):
@@ -167,3 +168,9 @@ def test_is_newtype():
     UserId = NewType("UserId", int)
     assert is_newtype(UserId) is True
     assert is_newtype(int) is False
+
+
+def test_display_type():
+    assert display_type(int) == "int"
+    assert display_type(List[Dict[str, str]]) == "List[Dict[str, str]]"
+    assert display_type(Annotated[int, 3]) == "Annotated[int, 3]"

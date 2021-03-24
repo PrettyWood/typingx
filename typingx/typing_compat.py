@@ -20,6 +20,7 @@ __all__ = (
     "is_annotated",
     "is_newtype",
     "is_typeddict",
+    "display_type",
 )
 
 
@@ -303,3 +304,15 @@ def is_annotated(tp: TypeLike) -> bool:
     Check if a type is a `Annotated`
     """
     return tp.__class__ is AnnotatedOne.__class__
+
+
+#######################################
+# Utils
+#######################################
+def display_type(tp: TypeLike) -> str:
+    try:
+        if tp.__module__ not in {"typing", "typing_extensions"}:
+            return tp.__name__
+    except AttributeError:
+        pass
+    return str(tp).replace("typing_extensions.", "").replace("typing.", "")
