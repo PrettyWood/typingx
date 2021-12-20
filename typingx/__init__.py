@@ -4,7 +4,7 @@ from typing import *
 from .func_check import func_check
 from .main import Constraints, isinstancex, issubclassx
 from .types import Listx, Tuplex
-from .typing_compat import (
+from .typing_compat import (  # type: ignore[misc]
     Annotated,
     Literal,
     NoneType,
