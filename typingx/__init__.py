@@ -1,10 +1,28 @@
-# flake8: noqa
-from typing import *
+__version__ = "0.5.3"
+
+from typing import (
+    Any,
+    Callable,
+    Collection,
+    Dict,
+    FrozenSet,
+    Generic,
+    List,
+    Mapping,
+    NewType,
+    Optional,
+    Sequence,
+    Set,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
+)
 
 from .func_check import func_check
 from .main import Constraints, isinstancex, issubclassx
 from .types import Listx, Tuplex
-from .typing_compat import (  # type: ignore[misc]
+from .typing_compat import (
     Annotated,
     Literal,
     NoneType,
@@ -33,22 +51,22 @@ __all__ = (
     "Dict",
     "FrozenSet",
     "Generic",
-    "Literal",
     "List",
     "Listx",
+    "Literal",
     "Mapping",
-    "Optional",
     "NewType",
     "NoneType",
-    "Union",
+    "Optional",
     "Set",
     "Sequence",
     "Tuple",
     "Tuplex",
     "Type",
+    "TypedDict",
     "TypeLike",
     "TypeVar",
-    "TypedDict",
+    "Union",
     "get_args",
     "get_origin",
     "get_type_hints",
