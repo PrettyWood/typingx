@@ -28,7 +28,7 @@ if sys.version_info < (3, 10):
 else:
     import types
 
-    UNION_TYPES = {Union, types.Union}
+    UNION_TYPES = {Union, types.UnionType}
 
 
 @dataclass(frozen=True, repr=False)

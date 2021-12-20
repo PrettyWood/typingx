@@ -46,7 +46,6 @@ elif sys.version_info[:2] == (3, 8):
         else:
             return T.get_args(tp)
 
-
 elif sys.version_info[:2] == (3, 7):
 
     def T_get_args(tp: TypeLike) -> T.Tuple[T.Any, ...]:
@@ -62,7 +61,6 @@ elif sys.version_info[:2] == (3, 7):
             return args + T.cast(T.Tuple[T.Any, ...], tp.__metadata__)
         else:
             return args
-
 
 else:
 
@@ -120,7 +118,6 @@ elif sys.version_info[:2] == (3, 7):
 
     def T_get_origin(tp: TypeLike) -> T.Optional[TypeLike]:
         return getattr(tp, "__origin__", None)
-
 
 else:
 
@@ -220,7 +217,6 @@ if T.TYPE_CHECKING:
         def __call__(self, *args: T.Any, **kwargs: T.Any) -> T.Any:
             ...
 
-
 elif sys.version_info >= (3, 9):
     TypedDict = T.TypedDict
 
@@ -310,9 +306,7 @@ def is_annotated(tp: TypeLike) -> bool:
 # Utils
 #######################################
 def display_type(tp: TypeLike) -> str:
-    try:
-        if tp.__module__ not in {"typing", "typing_extensions"}:
-            return tp.__name__
-    except AttributeError:
-        pass
-    return str(tp).replace("typing_extensions.", "").replace("typing.", "")
+    if tp.__class__.__module__ in {"typing", "typing_extensions"}:
+        return str(tp).replace("typing_extensions.", "").replace("typing.", "")
+    else:
+        return tp.__name__
