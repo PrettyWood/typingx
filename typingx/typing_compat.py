@@ -217,14 +217,13 @@ if T.TYPE_CHECKING:
         def __call__(self, *args: T.Any, **kwargs: T.Any) -> T.Any:
             ...
 
-elif sys.version_info >= (3, 9):
-    TypedDict = T.TypedDict
-
 else:
-    # Even though `TypedDict` is already in python 3.8,
-    # the class doesn't have `__required_keys__` and `__optional_keys__`,
-    # which prevents a perfect support
-    from typing_extensions import TypedDict
+    try:
+        # Try to load new typing if possible for PEP 655 support or for missing
+        # `__required_keys__` and `__optional_keys__` attributes in python 3.8
+        from typing_extensions import TypedDict
+    except ImportError:
+        from typing import TypedDict
 
 
 def is_typeddict(tp: TypeLike) -> bool:

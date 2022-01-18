@@ -32,6 +32,7 @@ include = ["typingx/py.typed"]
 [tool.poetry.dependencies]
 python = "^3.6.2"
 typing_extensions = { version = "^4.0.1", python = "<3.9.2" }
+typing-extensions = {version = "^4.0.1", extras = ["pep655"]}
 
 [tool.poetry.dev-dependencies]
 black = "^21.12b0"
