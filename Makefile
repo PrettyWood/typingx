@@ -11,7 +11,7 @@ install:
 
 .PHONY: test
 test:
-	poetry run pytest
+	poetry run pytest --cov typingx --cov-report=term-missing --cov-report=xml
 
 .PHONY: format
 format:
