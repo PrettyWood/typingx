@@ -4,6 +4,7 @@ isort = isort typingx tests
 
 .PHONY: install
 install:
+	pip install -U pip
 	pip install poetry
 	poetry install
 	poetry run pre-commit install
