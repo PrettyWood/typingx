@@ -13,10 +13,6 @@ install:
 test:
 	poetry run pytest
 
-.PHONY: test-all
-test-all:
-	tox -p all
-
 .PHONY: format
 format:
 	poetry run ${black}
