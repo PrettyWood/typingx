@@ -20,7 +20,7 @@ from .typing_compat import (
 
 try:
     import typing_extensions
-except ImportError:
+except ImportError:  # pragma: no cover
     typing_extensions = None  # type: ignore[assignment]
 
 __all__ = ("Constraints", "isinstancex", "issubclassx")
@@ -334,7 +334,7 @@ def _is_valid_typeddict(obj: Any, tp: TypedDict, constraints: Optional[Constrain
     optional_keys = set(tp.__optional_keys__)
     try:
         from typing_extensions import NotRequired, Required
-    except ImportError:
+    except ImportError:  # pragma: no cover
         pass
     else:
         for key in tp.__required_keys__:

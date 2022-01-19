@@ -79,5 +79,6 @@ show_error_context = true
 
 [tool.coverage.report]
 exclude_lines = [
+    "pragma: no cover",
     "if T.TYPE_CHECKING:",
 ]

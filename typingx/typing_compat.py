@@ -243,7 +243,7 @@ else:
         # Try to load new typing if possible for PEP 655 support or for missing
         # `__required_keys__` and `__optional_keys__` attributes in python 3.8
         from typing_extensions import TypedDict
-    except ImportError:
+    except ImportError:  # pragma: no cover
         from typing import TypedDict
 
 

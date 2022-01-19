@@ -30,7 +30,7 @@ from typingx import (
 
 try:
     import typing_extensions
-except ImportError:
+except ImportError:  # pragma: no cover
     typing_extensions = None
 
 
