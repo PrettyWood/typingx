@@ -35,7 +35,7 @@ class Movie1(TypedDict):
     title: str
     year: NotRequired[int]
 
-isinstancex(my_dict, list[int | float])
+isinstancex(my_dict, Movie1)
 
 # Check if `my_dict` has only string values expect an integer for 'a' and a boolean for 'b'
 isinstancex(my_dict, {'a': int, 'b': bool, ...: str})  # shortcut for `typing.TypedDict('TD', {'a': int, 'b': bool, __extra__: str})`
