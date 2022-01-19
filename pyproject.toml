@@ -32,6 +32,7 @@ include = ["typingx/py.typed"]
 [tool.poetry.dependencies]
 python = "^3.6.2"
 typing_extensions = { version = "^4.0.1", python = "<3.9.2" }
+typing-extensions = {version = "^4.0.1", extras = ["pep655"]}
 
 [tool.poetry.dev-dependencies]
 black = "^21.12b0"
@@ -44,7 +45,7 @@ pytest-cov = "^3.0.0"
 
 [tool.black]
 line-length = 100
-target-version = ["py38"]
+target-version = ["py310"]
 
 [tool.isort]
 line_length = 100
@@ -55,7 +56,7 @@ force_grid_wrap = 0
 use_parentheses = true
 
 [tool.mypy]
-python_version = 3.9
+python_version = "3.10"
 pretty = true
 allow_redefinition = false
 check_untyped_defs = true
@@ -78,5 +79,6 @@ show_error_context = true
 
 [tool.coverage.report]
 exclude_lines = [
+    "pragma: no cover",
     "if T.TYPE_CHECKING:",
 ]

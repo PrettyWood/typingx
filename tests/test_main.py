@@ -28,6 +28,11 @@ from typingx import (
     issubclassx,
 )
 
+try:
+    import typing_extensions
+except ImportError:  # pragma: no cover
+    typing_extensions = None
+
 
 class Pokemon:
     ...
@@ -526,3 +531,28 @@ def test_issubclassx(obj, tp, expected):
 
 def test_repr_constraints():
     assert repr(Constraints(ge=3, le=5)) == "Constraints(ge=3, le=5)"
+
+
+@pytest.mark.skipif(not typing_extensions, reason="typing_extensions not installed")
+def test_PEP_655():
+    from typing_extensions import NotRequired, Required, TypedDict
+
+    class Movie1(TypedDict):
+        title: str
+        year: NotRequired[int]
+
+    assert isinstancex({"title": "qwe"}, Movie1)
+    assert isinstancex({"title": "qwe", "year": 2011}, Movie1)
+    assert not isinstancex({"title": "qwe", "pika": "chu"}, Movie1)
+    assert not isinstancex({"title": "qwe", "year": "2011"}, Movie1)
+    assert not isinstancex({"title": "qwe", "year": 2011, "pika": "chu"}, Movie1)
+
+    class Movie2(TypedDict, total=False):
+        title: Required[str]
+        year: int
+
+    assert isinstancex({"title": "qwe"}, Movie2)
+    assert isinstancex({"title": "qwe", "year": 2011}, Movie2)
+    assert not isinstancex({"title": "qwe", "pika": "chu"}, Movie2)
+    assert not isinstancex({"title": "qwe", "year": "2011"}, Movie2)
+    assert not isinstancex({"title": "qwe", "year": 2011, "pika": "chu"}, Movie2)

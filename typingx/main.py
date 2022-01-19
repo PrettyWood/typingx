@@ -8,7 +8,6 @@ from .typing_compat import (
     Annotated,
     Literal,
     NoneType,
-    OneOrManyTypes,
     TypedDict,
     TypeLike,
     get_args,
@@ -18,6 +17,11 @@ from .typing_compat import (
     is_newtype,
     is_typeddict,
 )
+
+try:
+    import typing_extensions
+except ImportError:  # pragma: no cover
+    typing_extensions = None  # type: ignore[assignment]
 
 __all__ = ("Constraints", "isinstancex", "issubclassx")
 
@@ -76,14 +80,14 @@ class Constraints:
         return f"Constraints({', '.join(defined_fields)})"
 
 
-def isinstancex(obj: Any, tp: OneOrManyTypes, *, constraints: Optional[Constraints] = None) -> bool:
+def isinstancex(obj: Any, tp: TypeLike, *, constraints: Optional[Constraints] = None) -> bool:
     try:
         return _isinstancex(obj, tp, constraints)
     except (AttributeError, TypeError):
         return False
 
 
-def issubclassx(obj: Any, tp: OneOrManyTypes) -> bool:
+def issubclassx(obj: Any, tp: TypeLike) -> bool:
     try:
         return _issubclassx(obj, tp)
     except (AttributeError, TypeError):
@@ -194,6 +198,14 @@ def _isinstancex(obj: Any, tp: TypeLike, constraints: Optional[Constraints] = No
     elif is_typeddict(tp):
         tp = cast(TypedDict, tp)
         return _is_valid_typeddict(obj, tp, constraints)
+
+    # `TypedDict` type qualifiers `Required` and `NotRequired`
+    # (see https://www.python.org/dev/peps/pep-0655/)
+    elif typing_extensions and origin in {
+        typing_extensions.NotRequired,
+        typing_extensions.Required,
+    }:
+        return any(isinstancex(obj, t) for t in get_args(tp))
 
     # e.g. Literal['Pika']
     elif is_literal(tp):
@@ -316,9 +328,27 @@ def _is_valid_typeddict(obj: Any, tp: TypedDict, constraints: Optional[Constrain
     # ensure it's a dict that contains all the required keys but extra values are allowed
     resolved_annotations = get_type_hints(tp)
 
+    # update required keys and optional keys with new PEP 655 type qualifiers
+    # (see https://www.python.org/dev/peps/pep-0655/)
+    required_keys = set(tp.__required_keys__)
+    optional_keys = set(tp.__optional_keys__)
+    try:
+        from typing_extensions import NotRequired, Required
+    except ImportError:  # pragma: no cover
+        pass
+    else:
+        for key in tp.__required_keys__:
+            if get_origin(resolved_annotations[key]) is NotRequired:
+                required_keys.discard(key)
+                optional_keys.add(key)
+        for key in tp.__optional_keys__:
+            if get_origin(resolved_annotations[key]) is Required:
+                optional_keys.discard(key)
+                required_keys.add(key)
+
     if TYPED_DICT_EXTRA_KEY in resolved_annotations:
         rest_type = resolved_annotations.pop(TYPED_DICT_EXTRA_KEY)
-        required_keys = set(tp.__required_keys__) - {TYPED_DICT_EXTRA_KEY}
+        required_keys -= {TYPED_DICT_EXTRA_KEY}
         if not set(obj).issuperset(required_keys):
             return False
 
@@ -336,9 +366,7 @@ def _is_valid_typeddict(obj: Any, tp: TypedDict, constraints: Optional[Constrain
 
     else:
         # ensure it's a dict that contains all the required keys without extra key
-        if not (
-            set(obj).issuperset(tp.__required_keys__) and set(obj).issubset(tp.__annotations__)
-        ):
+        if not (set(obj).issuperset(required_keys) and set(obj).issubset(tp.__annotations__)):
             return False
 
         return all(

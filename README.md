@@ -12,7 +12,17 @@ With this library, you can leverage `typing` types at runtime to do that!
 _This is even more powerful when used with generic standard collections (e.g. `list[str]`) introduced in python 3.9 and new union operator `|`
 introduced in python 3.10. If you want to use them with older version, a backport [future-typing](https://github.com/PrettyWood/future-typing) exists!_
 
-### Example
+## Installation
+```shell
+pip install typingx
+```
+
+If you want to use [PEP 655](https://www.python.org/dev/peps/pep-0655/) `TypedDict` related types `Required` and `NotRequired`, you can force the installation of `typing-extensions`
+```shell
+pip install "typingx[pep655]"
+```
+
+## Examples
 ```python
 # Check if `x` is a string or an integer
 isinstancex(x, str | int)
@@ -20,12 +30,19 @@ isinstancex(x, str | int)
 # Check if `my_list` has only numbers
 isinstancex(my_list, list[int | float])
 
+# Check if `my_dict` has 'title' key, possibly the 'year' key but nothing else
+class Movie1(TypedDict):
+    title: str
+    year: NotRequired[int]
+
+isinstancex(my_dict, list[int | float])
+
+# Check if `my_dict` has only string values expect an integer for 'a' and a boolean for 'b'
+isinstancex(my_dict, {'a': int, 'b': bool, ...: str})  # shortcut for `typing.TypedDict('TD', {'a': int, 'b': bool, __extra__: str})`
+
 # Check if `my_set` has only integers greater than 2 with at least 3 distinct ones
 Gt2Int = Annotated[int, Constraints(gt=2)]
 isinstancex(my_set, Annotated[set[Gt2Int], Constraints(min_length=3)])  # or `typing.Set`
-
-# Check deeper the shape of `my_dict`
-isinstancex(my_dict, {'a': int, 'b': bool, ...: str})  # shortcut for `typing.TypedDict('TD', {'a': int, 'b': bool, __extra__: str})`
 
 # Check if all the keys are 1 lower case letter and values are integers with 1 digit
 OneLowerStr = Annotated[str, Constraints(regex='^[a-z]$')]
@@ -63,12 +80,6 @@ It hence provides:
   * `TypedDict` with `...` field to allow type checking on optional fields
 - extra types:
   * `Listx` and `Tuplex`: more sophisticated versions of `List` and `Tuple` to add `...` anywhere in the parameters
-
-## Installation
-
-``` bash
-    pip install typingx
-```
 
 ## isinstancex
 
@@ -227,6 +238,19 @@ assert isinstancex({"name": "The Matrix", "year": 1999, "q": "w", "e": 1}, Extra
 
 # TypedDict (shortcut)
 assert isinstancex({"name": "The Matrix", "year": 1999, "q": "w", "e": "r"}, {"name": str, "year": int, ...: str}) is True
+
+# TypedDict (PEP 655)
+from typing_extensions import NotRequired, TypedDict
+
+class Movie1(TypedDict):
+    title: str
+    year: NotRequired[int]
+
+assert isinstancex({"title": "qwe"}, Movie1)
+assert isinstancex({"title": "qwe", "year": 2011}, Movie1)
+assert not isinstancex({"title": "qwe", "pika": "chu"}, Movie1)
+assert not isinstancex({"title": "qwe", "year": "2011"}, Movie1)
+assert not isinstancex({"title": "qwe", "year": 2011, "pika": "chu"}, Movie1)
 
 # Union
 assert isinstancex(3, Union[str, int]) is True
