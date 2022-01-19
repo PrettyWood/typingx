@@ -94,6 +94,14 @@ else:
         if is_annotated(tp):
             args = (args[0], *args[1])
 
+        # if tp.__class__ in {NotRequired, Required}:
+        #     return (tp.__type__,)
+        if tp.__module__ == "typing_extensions" and tp.__class__.__name__ in {
+            "_NotRequired",
+            "_Required",
+        }:
+            return (tp.__type__,)
+
         return args
 
 
@@ -166,7 +174,20 @@ def get_origin(tp: TypeLike) -> T.Optional[TypeLike]:
 
     # Python 3.6
     else:
-        if is_literal(tp):
+        # if tp.__class__ in {NotRequired, Required}:
+        #     return tp.__class__
+        if getattr(tp, "__module__", None) == "typing_extensions" and tp.__class__.__name__ in {
+            "_NotRequired",
+            "_Required",
+        }:
+            from typing_extensions import NotRequired, Required
+
+            if tp.__class__.__name__ == "_NotRequired":
+                return NotRequired
+            else:
+                return Required
+
+        elif is_literal(tp):
             return Literal
 
         elif tp is T.Generic:
