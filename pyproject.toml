@@ -38,7 +38,7 @@ typing-extensions = {version = "^4.0.1", extras = ["pep655"]}
 black = "^21.12b0"
 flake8 = "^4.0.1"
 isort = "^5.10.1"
-mypy = "^0.931"
+mypy = "^0.941"
 pre-commit = "^2.17.0"
 pytest = "^6.2.5"
 pytest-cov = "^3.0.0"
