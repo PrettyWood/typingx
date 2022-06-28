@@ -35,7 +35,7 @@ typing_extensions = { version = "^4.0.1", python = "<3.9.2" }
 typing-extensions = {version = "^4.0.1", extras = ["pep655"]}
 
 [tool.poetry.dev-dependencies]
-black = "^21.12b0"
+black = "^22.6"
 flake8 = "^4.0.1"
 isort = "^5.10.1"
 mypy = "^0.931"
